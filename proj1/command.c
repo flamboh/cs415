@@ -96,16 +96,6 @@ void copyFile(char *sourcePath, char *destinationPath) {
   if (write(d, buf, s_st.st_size) < 0) perror("write");
 } /*for the cp command*/
 
-void moveFile(char *sourcePath, char *destinationPath) {
-
-
-  if (remove(sourcePath) < 0) {
-    easy_write("Error! File does not exist: ");
-    easy_write(sourcePath);
-    easy_write("\n");
-  }
-} /*for the mv command*/
-
 void deleteFile(char *filename) {
   if (remove(filename) < 0) {
     easy_write("Error! File does not exist: ");
@@ -113,6 +103,12 @@ void deleteFile(char *filename) {
     easy_write("\n");
   }
 } /*for the rm command*/
+
+void moveFile(char *sourcePath, char *destinationPath) {
+  copyFile(sourcePath, destinationPath);
+  deleteFile(sourcePath);
+} /*for the mv command*/
+
 
 void displayFile(char *filename) {
   int fd = open(filename, O_RDONLY);
