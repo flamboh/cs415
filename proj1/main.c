@@ -13,25 +13,26 @@ void write_parameters_error(char *command) {
   easy_write("\n");
 }
 
+
 int main(int argc, char** argv) {
-  // char input[] = "ls -l; rm file; cd ~ ; mkdir test; cd /home/user/obo;";
+  FILE* fp = NULL;
+  if (argc > 1) {
+    fp = fopen(argv[1], "r");
+  }
+
   command_line commands;
-  // commands = str_tokenize(input);
-
-  // for (int i = 0; i < commands.num_token; i++) {
-  //   printf("[%s]\n", commands.command_list[i]);
-  // }
-
-  // free_command_line(&commands);
 
   char *line = NULL;
   size_t len = 0;
   int exit_flag = 1;
   while (exit_flag) {
     easy_write(">>> ");
-    ssize_t nread = getline(&line, &len, stdin);
-    if (nread < 0) {
-      perror("getline");
+    ssize_t nread;
+    if (fp != NULL) nread = getline(&line, &len, fp);
+    else nread = getline(&line, &len, stdin);
+    if (nread == -1) {
+      if (feof(fp)) break;
+      else perror("getline");
     }
     commands = str_tokenize(line);
     command_args args;
@@ -80,6 +81,7 @@ int main(int argc, char** argv) {
     commands.command_list = NULL;
     commands.num_token = 0;
   }
+  fclose(fp);
   free(line);
   return 0;
 }

@@ -40,7 +40,7 @@ void showCurrentDir() {
 
 void makeDir(char *dirName) {
   if (mkdir(dirName, 0755) < 0) {
-    easy_write("Error! Directory name already exists:");
+    easy_write("Error! Directory name already exists: ");
     easy_write(dirName);
     easy_write("\n");
   }
