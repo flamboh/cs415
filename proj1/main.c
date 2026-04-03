@@ -32,16 +32,19 @@ int main(int argc, char** argv) {
 
     for (int i = 0; i < commands.num_token; i++) {
       char *cur = commands.command_list[i];
+      command_args args = parse_command_args(cur);
+      if (args.num_args <= 0) continue;
+      char *command = args.arg_list[0];
       printf("[%s]\n", cur); // REMOVE LATER!!!!
       if (!strcasecmp(cur, "exit")) {
         free(line);
         exit_flag = 0;
         break; }
-      else if (!strcasecmp(cur, "ls")) listDir();
-      else if (!strcasecmp(cur, "pwd")) showCurrentDir();
+      else if (!strcasecmp(command, "ls")) listDir();
+      else if (!strcasecmp(command, "pwd")) showCurrentDir();
       else {
         easy_write("Error! Unrecognized command: ");
-        easy_write(cur);
+        easy_write(command);
         easy_write("\n");
       }
     }

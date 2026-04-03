@@ -1,9 +1,11 @@
+#include "helper.h"
 #include <stdio.h>
 #include <strings.h>
 #include <unistd.h>
 #include <sys/syscall.h>
 #include <dirent.h>
 #include <string.h>
+#include <stdlib.h>
 
 void easy_write(const char *s) {
   ssize_t n = write(STDOUT_FILENO, s, strlen(s));
@@ -33,4 +35,30 @@ char *rtrim(char *s)
 char *trim(char *s)
 {
     return rtrim(ltrim(s));
+}
+
+command_args parse_command_args(char *str) {
+  command_args result;
+  result.arg_list = NULL;
+  result.num_args = 0;
+
+  int capacity = 4;
+  result.arg_list = malloc(capacity * sizeof(char *));
+
+  char *token;
+  char *save = str;
+
+  while ((token = strtok_r(save, ";", &save))) {
+    if (result.num_args >= capacity) {
+      capacity *= 2;
+      result.arg_list = realloc(result.arg_list, capacity * sizeof(char *));
+    }
+    token = trim(token);
+    if (strlen(token) < 1) continue;
+    result.arg_list[result.num_args] = malloc(strlen(token) + 1);
+    strcpy(result.arg_list[result.num_args], token);
+    result.num_args++;
+  }
+
+  return result;
 }

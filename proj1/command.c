@@ -6,6 +6,7 @@
 #include <strings.h>
 #include <unistd.h>
 #include <sys/syscall.h>
+#include <sys/stat.h>
 #include <dirent.h>
 #include <string.h>
 
@@ -26,7 +27,7 @@ void listDir() {
   }
   easy_write("\n");
 
-  free(dir);
+  closedir(dir);
 }
 
 void showCurrentDir() {
@@ -39,7 +40,26 @@ void showCurrentDir() {
 }
 
 void makeDir(char *dirName) {
+  char path[PATH_MAX];
+  if (getcwd(path, PATH_MAX) == NULL) {
+    perror("getcwd");
+  }
 
+  printf("%s\n", path);
+  DIR *dir = opendir(path);
+
+  struct dirent *entry;
+
+  while ((entry = readdir(dir)) != NULL) {
+    if (!strcasecmp(entry->d_name, dirName))
+    {
+      easy_write("Error! Directory name already exists:");
+      easy_write(dirName);
+      easy_write("\n");
+    }
+  }
+  mkdir(dirName, 0755);
+  closedir(dir);
 }
 
 void changeDir(char *dirName); /*for the cd command*/
