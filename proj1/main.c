@@ -34,15 +34,21 @@ int main(int argc, char** argv) {
       perror("getline");
     }
     commands = str_tokenize(line);
+    command_args args;
+    args.arg_list = NULL;
+    args.num_args = 0;
 
     for (int i = 0; i < commands.num_token; i++) {
       char *cur = commands.command_list[i];
-      command_args args = parse_command_args(cur);
+
+      args = parse_command_args(cur);
       if (args.num_args <= 0) continue;
+
       char *command = args.arg_list[0];
-      printf("[%s]\n", cur); // REMOVE LATER!!!!
-      if (!strcasecmp(cur, "exit")) {
-        free(line);
+      // printf("[%s]\n", cur);
+
+
+      if (!strcasecmp(command, "exit")) {
         exit_flag = 0;
         break; }
       else if (!strcasecmp(command, "ls")) listDir();
@@ -67,7 +73,13 @@ int main(int argc, char** argv) {
         easy_write("\n");
       }
     }
+    if (args.arg_list) {
+      free_command_args(&args);
+    }
+    free_command_line(&commands);
+    commands.command_list = NULL;
+    commands.num_token = 0;
   }
-  free_command_line(&commands);
+  free(line);
   return 0;
 }

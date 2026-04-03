@@ -62,3 +62,10 @@ command_args parse_command_args(char *str) {
 
   return result;
 }
+
+void free_command_args(command_args *args) {
+  for (int i = 0; i < args->num_args; ++i) {
+    free(args->arg_list[i]);
+  }
+  free(args->arg_list);
+}

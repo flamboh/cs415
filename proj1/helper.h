@@ -1,6 +1,7 @@
 #ifndef HELPER_H
 #define HELPER_H
 
+#include "string_parser.h"
 typedef struct
 {
   char** arg_list;    /* Array of args seperated by ' ' */
@@ -14,5 +15,7 @@ char *rtrim(char *s);
 char *trim(char *s);
 
 command_args parse_command_args(char *str);
+
+void free_command_args(command_args *args);
 
 #endif
