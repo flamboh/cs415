@@ -78,12 +78,13 @@ void copyFile(char *sourcePath, char *destinationPath) {
   strcpy(destFile, destinationPath);
   if (S_ISDIR(d_st.st_mode)) {
     char *base = basename(sourcePath);
-    void *tmp = realloc(destFile, strlen(destinationPath) + strlen(base) + 1);
+    void *tmp = realloc(destFile, strlen(destinationPath) + strlen(base) + 2);
     if (tmp == NULL) {
       free(destFile);
       return;
     }
     destFile = tmp;
+    strcat(destFile, "/");
     strcat(destFile, base);
   }
 
@@ -94,6 +95,8 @@ void copyFile(char *sourcePath, char *destinationPath) {
   int d = open(destFile, O_CREAT | O_WRONLY, 0755);
 
   if (write(d, buf, s_st.st_size) < 0) perror("write");
+  close(s);
+  close(d);
 } /*for the cp command*/
 
 void deleteFile(char *filename) {
@@ -128,4 +131,5 @@ void displayFile(char *filename) {
   easy_write("\n");
 
   free(buf);
+  close(fd);
 } /*for the cat command*/

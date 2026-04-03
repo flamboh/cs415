@@ -103,6 +103,13 @@ int main(int argc, char** argv) {
         }
         copyFile(args.arg_list[1], args.arg_list[2]);
       }
+      else if (!strcasecmp(command, "mv")) {
+        if (args.num_args != 3) {
+          write_parameters_error(command);
+          continue;
+        }
+        moveFile(args.arg_list[1], args.arg_list[2]);
+      }
       else {
         easy_write("Error! Unrecognized command: ");
         easy_write(command);
