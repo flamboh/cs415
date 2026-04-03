@@ -1,12 +1,7 @@
+#include "string_parser.h"
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
-
-typedef struct
-{
-    char** command_list;    /* Array of individual commands separated by ';' */
-    int num_token;          /* Number of tokens/commands found */
-} command_line;
 
 
 // from SO (https://stackoverflow.com/questions/656542/trim-a-string-in-c)
@@ -49,6 +44,7 @@ command_line str_tokenize(char* str) {
       result.command_list = realloc(result.command_list, capacity * sizeof(char *));
     }
     token = trim(token);
+    if (strlen(token) < 1) continue;
     result.command_list[result.num_token] = malloc(strlen(token) + 1);
     strcpy(result.command_list[result.num_token], token);
     result.num_token++;

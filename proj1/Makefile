@@ -2,7 +2,7 @@ CC = gcc
 CFLAGS = -Wall -Wextra -g
 
 TARGET = test.out
-SRC = test.c string_parser.c
+SRC = main.c string_parser.c command.c
 
 all: $(TARGET)
 
