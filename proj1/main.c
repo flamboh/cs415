@@ -54,8 +54,20 @@ int main(int argc, char** argv) {
       if (!strcasecmp(command, "exit")) {
         exit_flag = 0;
         break; }
-      else if (!strcasecmp(command, "ls")) listDir();
-      else if (!strcasecmp(command, "pwd")) showCurrentDir();
+      else if (!strcasecmp(command, "ls")){
+        if (args.num_args != 1) {
+          write_parameters_error(command);
+          continue;
+        }
+        listDir();
+      }
+      else if (!strcasecmp(command, "pwd")) {
+        if (args.num_args != 1) {
+          write_parameters_error(command);
+          continue;
+        }
+        showCurrentDir();
+      }
       else if (!strcasecmp(command, "mkdir")) {
         if (args.num_args != 2) {
           write_parameters_error(command);
@@ -83,6 +95,13 @@ int main(int argc, char** argv) {
           continue;
         }
         deleteFile(args.arg_list[1]);
+      }
+      else if (!strcasecmp(command, "cp")) {
+        if (args.num_args != 3) {
+          write_parameters_error(command);
+          continue;
+        }
+        copyFile(args.arg_list[1], args.arg_list[2]);
       }
       else {
         easy_write("Error! Unrecognized command: ");
