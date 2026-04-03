@@ -1,5 +1,6 @@
 #include "string_parser.h"
 #include "command.h"
+#include "helper.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <strings.h>
@@ -22,8 +23,7 @@ int main(int argc, char** argv) {
   size_t len = 0;
   while (1) {
     ssize_t num_read;
-    ssize_t num_wrote = write(STDOUT_FILENO, ">>> ", 4);
-    if (num_wrote < 0) perror("write");
+    easy_write(">>> ");
     ssize_t nread = getline(&line, &len, stdin);
     commands = str_tokenize(line);
 
@@ -31,8 +31,12 @@ int main(int argc, char** argv) {
       char *cur = commands.command_list[i];
       printf("[%s]\n", cur); // REMOVE LATER!!!!
       if (!strcasecmp(cur, "exit")) return EXIT_SUCCESS;
-      else if (!strcasecmp(cur, "ls")) {
-        listDir();
+      else if (!strcasecmp(cur, "ls")) listDir();
+      else if (!strcasecmp(cur, "pwd")) showCurrentDir();
+      else {
+        easy_write("Error! Unrecognized command: ");
+        easy_write(cur);
+        easy_write("\n");
       }
     }
   }

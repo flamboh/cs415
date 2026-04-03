@@ -1,30 +1,7 @@
 #include "string_parser.h"
+#include "helper.h"
 #include <string.h>
 #include <stdlib.h>
-#include <ctype.h>
-
-
-// from SO (https://stackoverflow.com/questions/656542/trim-a-string-in-c)
-char *ltrim(char *s)
-{
-    while(isspace(*s)) s++;
-    return s;
-}
-
-
-char *rtrim(char *s)
-{
-    char* back = s + strlen(s);
-    while(isspace(*--back));
-    *(back+1) = '\0';
-    return s;
-}
-
-
-char *trim(char *s)
-{
-    return rtrim(ltrim(s));
-}
 
 
 command_line str_tokenize(char* str) {

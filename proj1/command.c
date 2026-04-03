@@ -1,4 +1,5 @@
 #include "string_parser.h"
+#include "helper.h"
 #include <linux/limits.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,10 +8,6 @@
 #include <sys/syscall.h>
 #include <dirent.h>
 #include <string.h>
-
-static void easy_write(const char *s) {
-  write(STDOUT_FILENO, s, strlen(s));
-}
 
 void listDir() {
   char path[PATH_MAX];
@@ -25,11 +22,19 @@ void listDir() {
 
   while ((entry = readdir(dir)) != NULL) {
     easy_write(entry->d_name);
-    easy_write("\n");
+  easy_write(" ");
   }
+  easy_write("\n");
 }
 
-void showCurrentDir(); /*for the pwd command*/
+void showCurrentDir() {
+  char path[PATH_MAX];
+  if (getcwd(path, PATH_MAX) == NULL) {
+    perror("getcwd");
+  }
+  easy_write(path);
+  easy_write("\n");
+}
 
 void makeDir(char *dirName); /*for the mkdir command*/
 
