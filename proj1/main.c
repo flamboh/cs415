@@ -15,9 +15,13 @@ void write_parameters_error(char *command) {
 
 
 int main(int argc, char** argv) {
-  FILE* fp = NULL;
+  FILE* in = stdin;
   if (argc > 1) {
-    fp = fopen(argv[1], "r");
+    in = fopen(argv[1], "r");
+    if (!in) {
+      perror("fopen");
+      return 1;
+    }
   }
 
   command_line commands;
@@ -27,11 +31,9 @@ int main(int argc, char** argv) {
   int exit_flag = 1;
   while (exit_flag) {
     easy_write(">>> ");
-    ssize_t nread;
-    if (fp != NULL) nread = getline(&line, &len, fp);
-    else nread = getline(&line, &len, stdin);
+    ssize_t nread = getline(&line, &len, in);
     if (nread == -1) {
-      if (feof(fp)) break;
+      if (feof(in)) break;
       else perror("getline");
     }
     commands = str_tokenize(line);
@@ -81,7 +83,7 @@ int main(int argc, char** argv) {
     commands.command_list = NULL;
     commands.num_token = 0;
   }
-  fclose(fp);
+  fclose(in);
   free(line);
   return 0;
 }
