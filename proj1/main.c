@@ -70,6 +70,20 @@ int main(int argc, char** argv) {
         }
         changeDir(args.arg_list[1]);
       }
+      else if (!strcasecmp(command, "cat")) {
+        if (args.num_args != 2) {
+          write_parameters_error(command);
+          continue;
+        }
+        displayFile(args.arg_list[1]);
+      }
+      else if (!strcasecmp(command, "rm")) {
+        if (args.num_args != 2) {
+          write_parameters_error(command);
+          continue;
+        }
+        deleteFile(args.arg_list[1]);
+      }
       else {
         easy_write("Error! Unrecognized command: ");
         easy_write(command);

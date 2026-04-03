@@ -1,6 +1,7 @@
 #include "string_parser.h"
 #include "helper.h"
 #include <linux/limits.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <strings.h>
@@ -59,10 +60,36 @@ void changeDir(char *dirName) {
   }
 }
 
-void copyFile(char *sourcePath, char *destinationPath); /*for the cp command*/
+void copyFile(char *sourcePath, char *destinationPath) {
+
+} /*for the cp command*/
 
 void moveFile(char *sourcePath, char *destinationPath); /*for the mv command*/
 
-void deleteFile(char *filename); /*for the rm command*/
+void deleteFile(char *filename) {
+  if (rmdir(filename) < 0) {
+    easy_write("Error! File does not exist: ");
+    easy_write(filename);
+    easy_write("\n");
+  }
+} /*for the rm command*/
 
-void displayFile(char *filename); /*for the cat command*/
+void displayFile(char *filename) {
+  int fd = open(filename, O_RDONLY);
+  if (fd < 0) {
+    easy_write("Error! File does not exist: ");
+    easy_write(filename);
+    easy_write("\n");
+  }
+
+  struct stat st;
+  stat(filename, &st);
+
+  char *buf = malloc(st.st_size + 1);
+  read(fd, buf, st.st_size);
+  buf[st.st_size] = '\0';
+  easy_write(buf);
+  easy_write("\n");
+
+  free(buf);
+} /*for the cat command*/
