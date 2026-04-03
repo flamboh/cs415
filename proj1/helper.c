@@ -48,7 +48,7 @@ command_args parse_command_args(char *str) {
   char *token;
   char *save = str;
 
-  while ((token = strtok_r(save, ";", &save))) {
+  while ((token = strtok_r(save, " ", &save))) {
     if (result.num_args >= capacity) {
       capacity *= 2;
       result.arg_list = realloc(result.arg_list, capacity * sizeof(char *));

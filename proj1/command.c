@@ -16,7 +16,6 @@ void listDir() {
     perror("getcwd");
   }
 
-  printf("%s\n", path);
   DIR *dir = opendir(path);
 
   struct dirent *entry;
@@ -40,29 +39,25 @@ void showCurrentDir() {
 }
 
 void makeDir(char *dirName) {
-  char path[PATH_MAX];
-  if (getcwd(path, PATH_MAX) == NULL) {
-    perror("getcwd");
+  if (mkdir(dirName, 0755) < 0) {
+    easy_write("Error! Directory name already exists:");
+    easy_write(dirName);
+    easy_write("\n");
   }
-
-  printf("%s\n", path);
-  DIR *dir = opendir(path);
-
-  struct dirent *entry;
-
-  while ((entry = readdir(dir)) != NULL) {
-    if (!strcasecmp(entry->d_name, dirName))
-    {
-      easy_write("Error! Directory name already exists:");
-      easy_write(dirName);
-      easy_write("\n");
-    }
-  }
-  mkdir(dirName, 0755);
-  closedir(dir);
 }
 
-void changeDir(char *dirName); /*for the cd command*/
+void changeDir(char *dirName) {
+  if (!dirName) dirName = getenv("HOME");
+  if (!dirName) {
+    easy_write("Error! Home directory not found: cd");
+    easy_write("\n");
+  }
+  if (chdir(dirName) < 0) {
+    easy_write("Error! Directory does not exist:");
+    easy_write(dirName);
+    easy_write("\n");
+  }
+}
 
 void copyFile(char *sourcePath, char *destinationPath); /*for the cp command*/
 

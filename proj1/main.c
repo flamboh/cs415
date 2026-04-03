@@ -7,6 +7,11 @@
 #include <unistd.h>
 #include <string.h>
 
+void write_parameters_error(char *command) {
+  easy_write("Error! Unsupported parameters for command: ");
+  easy_write(command);
+  easy_write("\n");
+}
 
 int main(int argc, char** argv) {
   // char input[] = "ls -l; rm file; cd ~ ; mkdir test; cd /home/user/obo;";
@@ -42,6 +47,20 @@ int main(int argc, char** argv) {
         break; }
       else if (!strcasecmp(command, "ls")) listDir();
       else if (!strcasecmp(command, "pwd")) showCurrentDir();
+      else if (!strcasecmp(command, "mkdir")) {
+        if (args.num_args != 2) {
+          write_parameters_error(command);
+          continue;
+        }
+        makeDir(args.arg_list[1]);
+      }
+      else if (!strcasecmp(command, "cd")) {
+        if (args.num_args > 2) {
+          write_parameters_error(command);
+          continue;
+        }
+        changeDir(args.arg_list[1]);
+      }
       else {
         easy_write("Error! Unrecognized command: ");
         easy_write(command);
