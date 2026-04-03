@@ -25,6 +25,8 @@ void listDir() {
   easy_write(" ");
   }
   easy_write("\n");
+
+  free(dir);
 }
 
 void showCurrentDir() {
@@ -36,7 +38,9 @@ void showCurrentDir() {
   easy_write("\n");
 }
 
-void makeDir(char *dirName); /*for the mkdir command*/
+void makeDir(char *dirName) {
+
+}
 
 void changeDir(char *dirName); /*for the cd command*/
 
