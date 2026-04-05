@@ -1,5 +1,6 @@
-#include "string_parser.h"
 #include "helper.h"
+#include <asm-generic/errno-base.h>
+#include <errno.h>
 #include <linux/limits.h>
 #include <fcntl.h>
 #include <stdatomic.h>
@@ -63,20 +64,41 @@ void changeDir(char *dirName) {
 }
 
 void copyFile(char *sourcePath, char *destinationPath) {
-  int s = open(sourcePath, O_RDONLY);
+  int s = -1, d = -1;
+  s = open(sourcePath, O_RDONLY);
+  char *destFile = NULL;
+  struct stat s_st, d_st;
+  int dest_exists = 0;
+
   if (s < 0) {
     easy_write("Error! File does not exist: ");
     easy_write(sourcePath);
     easy_write("\n");
+    return;
   }
 
-  struct stat s_st, d_st;
-  stat(sourcePath, &s_st);
-  stat(destinationPath, &d_st);
-  char *destFile = NULL;
+  if (stat(sourcePath, &s_st) == -1) {
+    perror("stat");
+    close(s);
+    return;
+  }
+  if (stat(destinationPath, &d_st) == -1) {
+    if (errno != ENOENT) {
+      perror("stat");
+      close(s);
+      return;
+    }
+  } else {
+    dest_exists = 1;
+  }
+
   destFile = malloc(strlen(destinationPath) + 1);
+  if (!destFile) {
+      close(s);
+      return;
+  }
   strcpy(destFile, destinationPath);
-  if (S_ISDIR(d_st.st_mode)) {
+  if (dest_exists && S_ISDIR(d_st.st_mode)) {
     char *base = basename(sourcePath);
     void *tmp = realloc(destFile, strlen(destinationPath) + strlen(base) + 2);
     if (tmp == NULL) {
@@ -88,15 +110,36 @@ void copyFile(char *sourcePath, char *destinationPath) {
     strcat(destFile, base);
   }
 
+  // char *buf = malloc(s_st.st_size);
+  // read(s, buf, s_st.st_size);
 
-  char *buf = malloc(s_st.st_size);
-  read(s, buf, s_st.st_size);
+  d = open(destFile, O_CREAT | O_WRONLY | O_TRUNC, 0644);
+  if (d < 0) {
+      perror("open destination");
+      free(destFile);
+      close(s);
+      return;
+  }
 
-  int d = open(destFile, O_CREAT | O_WRONLY, 0755);
+  // if (write(d, buf, s_st.st_size) < 0) perror("write");
 
-  if (write(d, buf, s_st.st_size) < 0) perror("write");
+  char buf[4096];
+  ssize_t nread;
+  while ((nread = read(s, buf, sizeof(buf))) > 0) {
+      ssize_t off = 0;
+      while (off < nread) {
+          ssize_t nwritten = write(d, buf + off, nread - off);
+          if (nwritten < 0) {
+              perror("write");
+              free(destFile);
+              close(s);
+              close(d);
+          }
+          off += nwritten;
+      }
+  }
+  if (nread < 0) perror("read");
 
-  free(buf);
   free(destFile);
   close(s);
   close(d);

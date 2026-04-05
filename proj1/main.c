@@ -143,7 +143,7 @@ int main(int argc, char** argv) {
     commands.command_list = NULL;
     commands.num_token = 0;
   }
-  fclose(in);
+  if (in != stdin) fclose(in);
   free(line);
   return 0;
 }
