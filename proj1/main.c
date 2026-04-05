@@ -25,6 +25,11 @@ int main(int argc, char** argv) {
   }
 
   command_line commands;
+  commands.command_list = NULL;
+  commands.num_token = 0;
+  command_args args;
+  args.arg_list = NULL;
+  args.num_args = 0;
 
   char *line = NULL;
   size_t len = 0;
@@ -33,13 +38,21 @@ int main(int argc, char** argv) {
     easy_write(">>> ");
     ssize_t nread = getline(&line, &len, in);
     if (nread == -1) {
-      if (feof(in)) break;
+      if (feof(in))
+      {
+        if (args.arg_list) {
+          free_command_args(&args);
+        }
+        args.arg_list = NULL;
+        args.num_args = 0;
+        free_command_line(&commands);
+        commands.command_list = NULL;
+        commands.num_token = 0;
+        break;
+      }
       else perror("getline");
     }
     commands = str_tokenize(line);
-    command_args args;
-    args.arg_list = NULL;
-    args.num_args = 0;
 
     for (int i = 0; i < commands.num_token; i++) {
       char *cur = commands.command_list[i];
@@ -115,10 +128,17 @@ int main(int argc, char** argv) {
         easy_write(command);
         easy_write("\n");
       }
+      if (args.arg_list) {
+        free_command_args(&args);
+      }
+      args.arg_list = NULL;
+      args.num_args = 0;
     }
     if (args.arg_list) {
       free_command_args(&args);
     }
+    args.arg_list = NULL;
+    args.num_args = 0;
     free_command_line(&commands);
     commands.command_list = NULL;
     commands.num_token = 0;

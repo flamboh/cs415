@@ -95,6 +95,9 @@ void copyFile(char *sourcePath, char *destinationPath) {
   int d = open(destFile, O_CREAT | O_WRONLY, 0755);
 
   if (write(d, buf, s_st.st_size) < 0) perror("write");
+
+  free(buf);
+  free(destFile);
   close(s);
   close(d);
 } /*for the cp command*/

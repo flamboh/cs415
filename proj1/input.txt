@@ -5,4 +5,4 @@ cp ../input.txt . ; ls ; cat input.txt
 mv input.txt del.txt ; pwd ; ls
 rm del.txt ; ls
 cd .. ; pwd
-ls
+ls ; exit
