@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -g -ggdb3
 
-TARGET = test.out
+TARGET = shell
 SRC = main.c string_parser.c command.c helper.c
 
 all: $(TARGET)
