@@ -1,0 +1,59 @@
+\documentclass[12pt]{article}
+\usepackage{mathptmx}
+% ===== Packages =====
+\usepackage{amsmath, amssymb, amsthm}   % math symbols/environments
+\usepackage{graphicx}                   % images
+\usepackage{hyperref}                   % links
+\usepackage{enumitem}                   % better lists
+\usepackage{xcolor}                     % color (for code or emphasis)
+\usepackage{listings}                   % for code blocks
+\usepackage{geometry}                   % page setup
+\geometry{margin=1in}
+
+% ===== Code styling =====
+\lstset{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{gray!5},
+  frame=single,
+  breaklines=true,
+  columns=fullflexible
+}
+
+% Source - https://tex.stackexchange.com/a/258486
+% Posted by Andrew Pinkham
+% Retrieved 2026-02-24, License - CC BY-SA 3.0
+
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+
+% ===== Title info =====
+\title{Project 1 - Pseudo Shell}
+\author{Oliver Boorstein \\ University of Oregon}
+\date{\today}
+
+\begin{document}
+\maketitle
+\pagebreak
+
+\section{Introduction}
+This project implements a pseudo shell in C. This shell is replicating the usual Bash or Zsh shell using syscalls and string processing. Overall, the project is fairly simple. We also replicate shell scripts using file mode by running the binary with a file as an argument.
+
+\section{Background}
+I had nearly the entire understanding to complete this project before starting. I began this project before we had the lecture on syscalls, but it was fairly simple to figure out their use from online examples. It's nice how the syscalls handle the majority of cases for you.
+
+\section{Implementation}
+The design flows through main.c. This begins with checking whether we'll be in file mode or shell mode. This is done by checking for a filename argument and validating that argument.
+
+After this begins the main loop. This loop prompts for input, reads a line (from either stdin or a file) and tokenizes it into comands and arguments.
+
+The command and argument tokenization was one of the few difficult parts of this project. Tokenization uses a dynamic string array which grows as the number of commands or arguments does. These strings are trimmed to remove white space and ";" to clean up for the main loop.
+
+From there, the loop uses a if else chain to determine which command to run. Before running a selected command, the args are checked to avoid errors.
+
+Command implementations, for many of them, are solved entirely by syscalls. Of particular interest, are \lstinline[language=C]|copyFile| and \lstinline[language=C]|displayFile|.
+
+\section{Performance Results and Discussion}
+
+\section{Conclusion}
+\end{document}
