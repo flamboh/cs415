@@ -70,6 +70,7 @@ int main(int argc, char** argv) {
       else if (!strcasecmp(command, "ls")){
         if (args.num_args != 1) {
           write_parameters_error(command);
+          if (args.arg_list) free_command_args(&args);
           continue;
         }
         listDir();
