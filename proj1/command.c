@@ -152,7 +152,7 @@ void deleteFile(char *filename) {
     easy_write(filename);
     easy_write("\n");
   }
-  else {
+  else if (errno < 0) {
     easy_write("Error! File does not exist: ");
     easy_write(filename);
     easy_write("\n");
