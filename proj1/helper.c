@@ -16,25 +16,26 @@ void easy_write(const char *s) {
 
 
 // from SO (https://stackoverflow.com/questions/656542/trim-a-string-in-c)
+// lightly modified
 char *ltrim(char *s)
 {
-    while(isspace(*s)) s++;
-    return s;
+  while(isspace((unsigned char)*s)) s++;
+  return s;
 }
 
 
 char *rtrim(char *s)
 {
-    char* back = s + strlen(s);
-    while(isspace(*--back));
-    *(back+1) = '\0';
-    return s;
+  size_t len = strlen(s);
+  while (len > 0 && isspace((unsigned char)s[len - 1])) len--;
+  s[len]= '\0';
+  return s;
 }
 
 
 char *trim(char *s)
 {
-    return rtrim(ltrim(s));
+  return rtrim(ltrim(s));
 }
 
 command_args parse_command_args(char *str) {

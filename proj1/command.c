@@ -146,13 +146,13 @@ void copyFile(char *sourcePath, char *destinationPath) {
 } /*for the cp command*/
 
 void deleteFile(char *filename) {
-  unlink(filename);
-  if (errno == EISDIR) {
+  if (!unlink(filename)) return;
+  if (errno == EISDIR || errno == EPERM) {
     easy_write("Error! filename is a directory: ");
     easy_write(filename);
     easy_write("\n");
   }
-  else if (errno < 0) {
+  else {
     easy_write("Error! File does not exist: ");
     easy_write(filename);
     easy_write("\n");
