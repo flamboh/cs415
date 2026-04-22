@@ -86,6 +86,7 @@ void copyFile(char *sourcePath, char *destinationPath) {
     easy_write("Error! File is a directory: ");
     easy_write(sourcePath);
     easy_write("\n");
+    close(s);
     return;
   }
   if (stat(destinationPath, &d_st) == -1) {
@@ -196,6 +197,7 @@ void displayFile(char *filename) {
     easy_write("Error! filename is a directory: ");
     easy_write(filename);
     easy_write("\n");
+    close(fd);
     return;
   }
 
