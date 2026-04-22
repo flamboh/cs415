@@ -82,6 +82,12 @@ void copyFile(char *sourcePath, char *destinationPath) {
     close(s);
     return;
   }
+  if (S_ISDIR(s_st.st_mode)) {
+    easy_write("Error! File is a directory: ");
+    easy_write(sourcePath);
+    easy_write("\n");
+    return;
+  }
   if (stat(destinationPath, &d_st) == -1) {
     if (errno != ENOENT) {
       perror("stat");
