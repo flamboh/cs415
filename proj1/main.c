@@ -78,6 +78,7 @@ int main(int argc, char** argv) {
       else if (!strcasecmp(command, "pwd")) {
         if (args.num_args != 1) {
           write_parameters_error(command);
+          if (args.arg_list) free_command_args(&args);
           continue;
         }
         showCurrentDir();
@@ -85,6 +86,7 @@ int main(int argc, char** argv) {
       else if (!strcasecmp(command, "mkdir")) {
         if (args.num_args != 2) {
           write_parameters_error(command);
+          if (args.arg_list) free_command_args(&args);
           continue;
         }
         makeDir(args.arg_list[1]);
@@ -92,6 +94,7 @@ int main(int argc, char** argv) {
       else if (!strcasecmp(command, "cd")) {
         if (args.num_args > 2) {
           write_parameters_error(command);
+          if (args.arg_list) free_command_args(&args);
           continue;
         }
         changeDir(args.arg_list[1]);
@@ -99,6 +102,7 @@ int main(int argc, char** argv) {
       else if (!strcasecmp(command, "cat")) {
         if (args.num_args != 2) {
           write_parameters_error(command);
+          if (args.arg_list) free_command_args(&args);
           continue;
         }
         displayFile(args.arg_list[1]);
@@ -106,6 +110,7 @@ int main(int argc, char** argv) {
       else if (!strcasecmp(command, "rm")) {
         if (args.num_args != 2) {
           write_parameters_error(command);
+          if (args.arg_list) free_command_args(&args);
           continue;
         }
         deleteFile(args.arg_list[1]);
@@ -113,6 +118,7 @@ int main(int argc, char** argv) {
       else if (!strcasecmp(command, "cp")) {
         if (args.num_args != 3) {
           write_parameters_error(command);
+          if (args.arg_list) free_command_args(&args);
           continue;
         }
         copyFile(args.arg_list[1], args.arg_list[2]);
@@ -120,6 +126,7 @@ int main(int argc, char** argv) {
       else if (!strcasecmp(command, "mv")) {
         if (args.num_args != 3) {
           write_parameters_error(command);
+          if (args.arg_list) free_command_args(&args);
           continue;
         }
         moveFile(args.arg_list[1], args.arg_list[2]);

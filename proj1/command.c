@@ -160,9 +160,17 @@ void deleteFile(char *filename) {
 } /*for the rm command*/
 
 void moveFile(char *sourcePath, char *destinationPath) {
+  struct stat s_st;
+  if (stat(sourcePath, &s_st)) {
+    char *base = basename(sourcePath);
+    easy_write("Error! File does not exist: ");
+    easy_write(base);
+    easy_write("\n");
+    return;
+  }
   copyFile(sourcePath, destinationPath);
-  struct stat st;
-  if (stat(destinationPath, &st) == 0) deleteFile(sourcePath);
+  struct stat d_st;
+  if (!stat(destinationPath, &d_st)) deleteFile(sourcePath);
 } /*for the mv command*/
 
 
@@ -177,6 +185,13 @@ void displayFile(char *filename) {
 
   struct stat st;
   stat(filename, &st);
+
+  if (S_ISDIR(st.st_mode)) {
+    easy_write("Error! filename is a directory: ");
+    easy_write(filename);
+    easy_write("\n");
+    return;
+  }
 
   char *buf = malloc(st.st_size + 1);
   read(fd, buf, st.st_size);
