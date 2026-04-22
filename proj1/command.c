@@ -146,7 +146,13 @@ void copyFile(char *sourcePath, char *destinationPath) {
 } /*for the cp command*/
 
 void deleteFile(char *filename) {
-  if (remove(filename) < 0) {
+  unlink(filename);
+  if (errno == EISDIR) {
+    easy_write("Error! filename is a directory: ");
+    easy_write(filename);
+    easy_write("\n");
+  }
+  else {
     easy_write("Error! File does not exist: ");
     easy_write(filename);
     easy_write("\n");
@@ -155,7 +161,8 @@ void deleteFile(char *filename) {
 
 void moveFile(char *sourcePath, char *destinationPath) {
   copyFile(sourcePath, destinationPath);
-  deleteFile(sourcePath);
+  struct stat st;
+  if (stat(destinationPath, &st) == 0) deleteFile(sourcePath);
 } /*for the mv command*/
 
 
@@ -165,6 +172,7 @@ void displayFile(char *filename) {
     easy_write("Error! File does not exist: ");
     easy_write(filename);
     easy_write("\n");
+    return;
   }
 
   struct stat st;
