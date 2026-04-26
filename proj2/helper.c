@@ -38,35 +38,48 @@ char *trim(char *s)
   return rtrim(ltrim(s));
 }
 
-command_args parse_command_args(char *str) {
-  command_args result;
-  result.arg_list = NULL;
-  result.num_args = 0;
+int count_token (char* buf, const char* delim)
+{
+  if (buf == NULL) return 0;
+  int len = strlen(buf);
+  int result = 0;
 
-  int capacity = 4;
-  result.arg_list = malloc(capacity * sizeof(char *));
 
-  char *token;
-  char *save = str;
-
-  while ((token = strtok_r(save, " ", &save))) {
-    if (result.num_args >= capacity) {
-      capacity *= 2;
-      result.arg_list = realloc(result.arg_list, capacity * sizeof(char *));
-    }
-    token = trim(token);
-    if (strlen(token) < 1) continue;
-    result.arg_list[result.num_args] = malloc(strlen(token) + 1);
-    strcpy(result.arg_list[result.num_args], token);
-    result.num_args++;
+  for (int i = 0; i < len; ++i) {
+    if (i == 0 && buf[i] == *delim) continue;
+    if (i == len - 1 && buf[i] == *delim) break;
+    if (buf[i] == *delim) result++;
+    if (i == len - 1) result++;
   }
-
   return result;
 }
 
-void free_command_args(command_args *args) {
-  for (int i = 0; i < args->num_args; ++i) {
-    free(args->arg_list[i]);
+str_list str_tokenize(char* buf, const char* delim)
+{
+  str_list result;
+  result.list = NULL;
+  result.size = count_token(buf, delim);
+  result.list = malloc((result.size + 1) * sizeof(char *));
+  char *token;
+  char *save = buf;
+  int cur = 0;
+
+  while ((token = strtok_r(save, delim, &save))) {
+    token = trim(token);
+    if (strlen(token) < 1) continue;
+    result.list[cur] = malloc(strlen(token) + 1);
+    strcpy(result.list[cur], token);
+    cur++;
   }
-  free(args->arg_list);
+
+  result.list[cur] = NULL;
+  return result;
+}
+
+
+void free_str_list(str_list *list) {
+  for (int i = 0; i < list->size; ++i) {
+    free(list->list[i]);
+  }
+  free(list->list);
 }

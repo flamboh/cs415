@@ -1,4 +1,5 @@
 #include "helper.h"
+#include <signal.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -46,9 +47,27 @@ int main(int argc, char* argv[]) {
       }
       if (pid == 0) {
         printf("Child process %d executing: %s, from command_lines.list[%d]\n", processes, command_lines.list[i], i);
-        if (execvp(args.list[0], args.list) == -1) {
-          perror("exec");
-          _exit(EXIT_FAILURE);
+        sigset_t set;
+        sigemptyset(&set);
+        sigaddset(&set, SIGUSR1);
+        sigaddset(&set, SIGSTOP);
+        sigaddset(&set, SIGCONT);
+
+        pthread_sigmask(SIG_BLOCK, &set, NULL);
+        int sig;
+        while (1) {
+          sigwait(&set, &sig);
+          if (sig == SIGUSR1) {
+            if (execvp(args.list[0], args.list) == -1) {
+              perror("exec");
+              _exit(EXIT_FAILURE);
+            }
+
+          } else if (sig == SIGSTOP) {
+            pause();
+          } else if (sig == SIGCONT) {
+            continue;
+          }
         }
         exit(EXIT_SUCCESS);
       }
