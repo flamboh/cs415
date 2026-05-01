@@ -1,86 +1,82 @@
 #include "helper.h"
-#include <asm-generic/errno-base.h>
-#include <linux/limits.h>
+#include <limits.h>
 #include <fcntl.h>
-#include <stdatomic.h>
-#include <libgen.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <strings.h>
 #include <unistd.h>
-#include <sys/syscall.h>
 #include <sys/stat.h>
 #include <dirent.h>
 #include <string.h>
+
+static int should_skip_file(const char *filename)
+{
+  return strcmp(filename, ".") == 0 ||
+         strcmp(filename, "..") == 0 ||
+         strcmp(filename, "main.c") == 0 ||
+         strcmp(filename, "command.c") == 0 ||
+         strcmp(filename, "output.txt") == 0 ||
+         strcmp(filename, "shell.exe") == 0;
+}
+
 void lfcat()
 {
   char path[PATH_MAX];
   if (getcwd(path, PATH_MAX) == NULL) {
     perror("getcwd");
+    return;
   }
 
   DIR *dir = opendir(path);
+  if (dir == NULL) {
+    perror("opendir");
+    return;
+  }
 
   struct dirent *entry;
 
   while ((entry = readdir(dir)) != NULL) {
     char *filename = entry->d_name;
-    int fd = open(filename, O_RDONLY);
-    if (fd < 0) {
-      // easy_write("Error! File does not exist: ");
-      // easy_write(filename);
-      // easy_write("\n");
+
+    if (should_skip_file(filename)) {
       continue;
     }
 
     struct stat st;
-    stat(filename, &st);
-
-    if (S_ISDIR(st.st_mode)) {
-      // easy_write("Error! filename is a directory: ");
-      // easy_write(filename);
-      // easy_write("\n");
-      close(fd);
+    if (stat(filename, &st) == -1 || !S_ISREG(st.st_mode)) {
       continue;
     }
+
+    int fd = open(filename, O_RDONLY);
+    if (fd < 0) {
+      continue;
+    }
+
     easy_write("File: ");
     easy_write(filename);
     easy_write("\n");
+
     FILE *fp = fdopen(fd, "r");
     if (fp == NULL) {
-        perror("fdopen");
-        return;
+      perror("fdopen");
+      close(fd);
+      continue;
     }
-
-    char *buf = NULL;
-    size_t buf_len = 0;
 
     char *line = NULL;
     size_t line_cap = 0;
 
     ssize_t n;
     while ((n = getline(&line, &line_cap, fp)) != -1) {
-        char *tmp = realloc(buf, buf_len + n + 1);
-        if (tmp == NULL) {
-            free(buf);
-            free(line);
-            fclose(fp);
-            return;
-        }
-
-        buf = tmp;
-        memcpy(buf + buf_len, line, n);
-        buf_len += n;
-        buf[buf_len] = '\0';
+      if (write(STDOUT_FILENO, line, n) == -1) {
+        perror("write");
+        break;
+      }
     }
 
     free(line);
     fclose(fp);
-    easy_write(buf);
     easy_write("\n");
 
-    free(buf);
-    close(fd);
     for (int i = 0; i < 80; ++i) easy_write("-");
     easy_write("\n");
   }

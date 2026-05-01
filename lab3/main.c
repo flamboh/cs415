@@ -73,7 +73,14 @@ int main(int argc, char** argv) {
           if (args.arg_list) free_command_args(&args);
           continue;
         }
+        if (freopen("output.txt", "w", stdout) == NULL) {
+          perror("freopen");
+          if (args.arg_list) free_command_args(&args);
+          continue;
+        }
         lfcat();
+        exit_flag = 0;
+        break;
       }
       else {
         easy_write("Error! Unrecognized command: ");
