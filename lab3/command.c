@@ -7,6 +7,7 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <string.h>
+#include <ctype.h>
 
 static int should_skip_file(const char *filename)
 {
@@ -16,6 +17,32 @@ static int should_skip_file(const char *filename)
          strcmp(filename, "command.c") == 0 ||
          strcmp(filename, "output.txt") == 0 ||
          strcmp(filename, "shell.exe") == 0;
+}
+
+static int is_text_file(int fd)
+{
+  char buf[512];
+  ssize_t bytes_read = read(fd, buf, sizeof(buf));
+
+  if (bytes_read < 0) {
+    return 0;
+  }
+
+  if (lseek(fd, 0, SEEK_SET) == -1) {
+    return 0;
+  }
+
+  for (ssize_t i = 0; i < bytes_read; ++i) {
+    unsigned char c = (unsigned char)buf[i];
+    if (c == '\0') {
+      return 0;
+    }
+    if (!isprint(c) && c != '\n' && c != '\r' && c != '\t') {
+      return 0;
+    }
+  }
+
+  return 1;
 }
 
 void lfcat()
@@ -48,6 +75,11 @@ void lfcat()
 
     int fd = open(filename, O_RDONLY);
     if (fd < 0) {
+      continue;
+    }
+
+    if (!is_text_file(fd)) {
+      close(fd);
       continue;
     }
 
