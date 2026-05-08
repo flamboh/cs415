@@ -6,3 +6,4 @@ test/
 *.o
 *.png
 *.tar.gz
+.DS_STORE
