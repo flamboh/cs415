@@ -17,13 +17,39 @@ int main(int argc,char*argv[])
 	/*
 	*	TODO
 	*	#1	declare child process pool
-	*	#2 	spawn n new processes
+	*/
+	pid_t* pid_array = (pid_t*)malloc(sizeof(pid_t) * atoi(argv[1]));
+	/*	#2 	spawn n new processes
 	*		first create the argument needed for the processes
 	*		for example "./iobound -seconds 10"
-	*	#3	call script_print
-	*	#4	wait for children processes to finish
-	*	#5	free any dynamic memory
 	*/
+	for (int i = 0; i < atoi(argv[1]); i++)
+	{
+		pid_array[i] = fork();
+		if (pid_array[i] == 0)
+		{
+			char* iobound_arg[] = {"./iobound", "-seconds", "10", NULL};
+			if (execvp("./iobound", iobound_arg) == -1)
+			{
+				perror ("execvp: ");
+				exit(1);
+			}
+			exit(0);
+		}
+	}
+	/*	#3	call script_print
+	*/
+	script_print(pid_array, atoi(argv[1]));
+	/*
+	*	#4	wait for children processes to finish
+	*/
+	for (int i = 0; i < atoi(argv[1]); i++)
+	{
+		waitpid(pid_array[i], NULL, 0);
+	}
+	/*	#5	free any dynamic memory
+	*/
+	free(pid_array);
 
 	return 0;
 }
@@ -56,5 +82,3 @@ void script_print (pid_t* pid_ary, int size)
 		}
 	}
 }
-
-
