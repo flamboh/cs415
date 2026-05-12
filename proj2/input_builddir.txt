@@ -1,0 +1,5 @@
+ls -a -r
+sleep 1
+invalid name
+./build/iobound -seconds 10
+./build/cpubound -seconds 10

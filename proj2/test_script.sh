@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# script relies on functioning input.txt and 
+# script relies on functioning input.txt and
 # Makefile to make all parts
 # iobound, and cpubound executables
 
@@ -369,4 +369,3 @@ test_part1 $EXECUTABLE1
 test_part2 $EXECUTABLE2
 test_part3 $EXECUTABLE3
 test_part4 $EXECUTABLE4
-
