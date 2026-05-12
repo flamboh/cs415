@@ -48,15 +48,27 @@ int main(int argc, char* argv[]) {
         printf("Child process %d executing: %s, from command_lines.list[%d]\n", processes, command_lines.list[i], i);
         if (execvp(args.list[0], args.list) == -1) {
           perror("exec");
+          free(line);
+          free(pid_array);
+          free_str_list(&command_lines);
+          free_str_list(&args);
+          fclose(in);
           _exit(EXIT_FAILURE);
         }
         exit(EXIT_SUCCESS);
       }
       pid_array[processes++] = pid;
+      free_str_list(&args);
     }
+    free_str_list(&command_lines);
   }
   for (int i = 0; i < processes; i++) {
     waitpid(pid_array[i], NULL, 0);
   }
+  free(line);
+  free(pid_array);
+  free_str_list(&command_lines);
+  free_str_list(&args);
+  fclose(in);
   exit(EXIT_SUCCESS);
 }
