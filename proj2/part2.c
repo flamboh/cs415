@@ -10,7 +10,7 @@
 int main(int argc, char* argv[]) {
   FILE* in;
   if (argc != 3 || strcmp(argv[1], "-f") != 0) {
-    printf("Usage: %s -f [input_file]\n", argv[0]);
+    printf("Invalid use: incorrect number of parameters\n");
     return 1;
   }
   in = fopen(argv[2], "r");
