@@ -3,18 +3,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/wait.h>
+#include <string.h>
+
 
 int main(int argc, char* argv[]) {
   FILE* in;
-  if (argc > 1) {
-    in = fopen(argv[1], "r");
-    if (!in) {
-      perror("fopen");
-      return 1;
-    }
+  if (argc != 3 || strcmp(argv[1], "-f") != 0) {
+    printf("Usage: %s -f [input_file]\n", argv[0]);
+    return 1;
   }
-  else {
-    printf("Usage: %s [input_file]\n", argv[0]);
+  in = fopen(argv[2], "r");
+  if (!in) {
+    perror("fopen");
     return 1;
   }
   str_list command_lines;
@@ -67,8 +67,8 @@ int main(int argc, char* argv[]) {
   }
   free(line);
   free(pid_array);
-  free_str_list(&command_lines);
-  free_str_list(&args);
+  // free_str_list(&command_lines);
+  // free_str_list(&args);
   fclose(in);
   exit(EXIT_SUCCESS);
 }
