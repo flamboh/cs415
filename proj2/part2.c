@@ -25,8 +25,27 @@ int main(int argc, char* argv[]) {
   size_t len = 0;
   ssize_t nread;
   pid_t* pid_array = malloc(sizeof(pid_t) * 2);
+  if (!pid_array) {
+    perror("malloc");
+    free(line);
+    fclose(in);
+    return 1;
+  }
   int pid_array_size = 2;
   int processes = 0;
+
+  sigset_t set;
+  sigset_t oldset;
+  sigemptyset(&set);
+  sigaddset(&set, SIGUSR1);
+
+  if (sigprocmask(SIG_BLOCK, &set, &oldset) == -1) {
+    perror("sigprocmask");
+    free(line);
+    free(pid_array);
+    fclose(in);
+    return 1;
+  }
 
   while ((nread = getline(&line, &len, in)) != -1) {
     command_lines = str_tokenize(line, ";");
@@ -35,21 +54,17 @@ int main(int argc, char* argv[]) {
       args = str_tokenize(command_lines.list[i], " ");
       if (pid_array_size == processes) {
         pid_array_size *= 2;
-        pid_array = realloc(pid_array, sizeof(pid_t) * pid_array_size);
-        if (!pid_array) {
+        pid_t* tmp = realloc(pid_array, sizeof(pid_t) * pid_array_size);
+        if (!tmp) {
           perror("realloc");
+          free(line);
+          free(pid_array);
+          free_str_list(&command_lines);
+          free_str_list(&args);
+          fclose(in);
           return 1;
         }
-      }
-      sigset_t set;
-      sigemptyset(&set);
-      sigaddset(&set, SIGUSR1);
-      // sigaddset(&set, SIGSTOP);
-      // sigaddset(&set, SIGCONT);
-
-      if (sigprocmask(SIG_BLOCK, &set, NULL) == -1) {
-          perror("sigprocmask");
-          exit(EXIT_FAILURE);
+        pid_array = tmp;
       }
       pid_t pid = fork();
       if (pid < 0) {
@@ -70,6 +85,15 @@ int main(int argc, char* argv[]) {
           exit(EXIT_FAILURE);
         }
         printf("[child %d] received SIGUSR1, execing %s\n", getpid(), command_lines.list[i]);
+        if (sigprocmask(SIG_SETMASK, &oldset, NULL) == -1) {
+          perror("sigprocmask restore child");
+          free(line);
+          free(pid_array);
+          free_str_list(&command_lines);
+          free_str_list(&args);
+          fclose(in);
+          _exit(EXIT_FAILURE);
+        }
         execvp(args.list[0], args.list);
         perror("execvp");
         free(line);
@@ -88,6 +112,14 @@ int main(int argc, char* argv[]) {
       free_str_list(&args);
     }
     free_str_list(&command_lines);
+  }
+
+  if (sigprocmask(SIG_SETMASK, &oldset, NULL) == -1) {
+    perror("sigprocmask restore parent");
+    free(line);
+    free(pid_array);
+    fclose(in);
+    return 1;
   }
 
   sleep(1);

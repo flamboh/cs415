@@ -24,6 +24,12 @@ int main(int argc, char* argv[]) {
   size_t len = 0;
   ssize_t nread;
   pid_t* pid_array = malloc(sizeof(pid_t) * 2);
+  if (!pid_array) {
+    perror("malloc");
+    free(line);
+    fclose(in);
+    return 1;
+  }
   int pid_array_size = 2;
   int processes = 0;
 
@@ -34,15 +40,23 @@ int main(int argc, char* argv[]) {
       args = str_tokenize(command_lines.list[i], " ");
       if (pid_array_size == processes) {
         pid_array_size *= 2;
-        pid_array = realloc(pid_array, sizeof(pid_t) * pid_array_size);
-        if (!pid_array) {
+        pid_t* tmp = realloc(pid_array, sizeof(pid_t) * pid_array_size);
+        if (!tmp) {
           perror("realloc");
+          free(line);
+          free(pid_array);
+          free_str_list(&command_lines);
+          free_str_list(&args);
+          fclose(in);
           return 1;
         }
+        pid_array = tmp;
       }
       pid_t pid = fork();
       if (pid < 0) {
         perror("fork");
+        free_str_list(&args);
+        continue;
       }
       if (pid == 0) {
         printf("Child process %d executing: %s, from command_lines.list[%d]\n", processes, command_lines.list[i], i);
@@ -63,7 +77,18 @@ int main(int argc, char* argv[]) {
     free_str_list(&command_lines);
   }
   for (int i = 0; i < processes; i++) {
-    waitpid(pid_array[i], NULL, 0);
+    int status;
+    pid_t done = waitpid(pid_array[i], &status, 0);
+    if (done == -1) {
+      perror("waitpid");
+      continue;
+    }
+
+    if (WIFEXITED(status)) {
+      printf("Parent: child %d exited with status %d\n", done, WEXITSTATUS(status));
+    } else if (WIFSIGNALED(status)) {
+      printf("Parent: child %d terminated by signal %d\n", done, WTERMSIG(status));
+    }
   }
   free(line);
   free(pid_array);
