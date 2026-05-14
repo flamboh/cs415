@@ -98,7 +98,14 @@ int main(int argc, char* argv[]) {
   }
   process_list.processes_size = 2;
 
-
+  sigset_t set;
+  sigset_t oldset;
+  sigemptyset(&set);
+  sigaddset(&set, SIGUSR1);
+  if (sigprocmask(SIG_BLOCK, &set, &oldset) == -1) {
+    perror("sigprocmask");
+    exit(EXIT_FAILURE);
+  }
   while ((nread = getline(&line, &len, in)) != -1) {
     command_lines = str_tokenize(line, ";");
 
@@ -106,21 +113,15 @@ int main(int argc, char* argv[]) {
       args = str_tokenize(command_lines.list[i], " ");
       if (process_list.count == process_list.processes_size) {
         process_list.processes_size *= 2;
-        process_list.processes = realloc(process_list.processes, sizeof(Process) * process_list.processes_size);
-        if (!process_list.processes) {
+        Process* tmp = realloc(process_list.processes, sizeof(Process) * process_list.processes_size);
+        if (!tmp) {
           perror("realloc");
+          free(line);
+          free_process_list(&process_list);
+          fclose(in);
           return 1;
         }
-      }
-      sigset_t set;
-      sigemptyset(&set);
-      sigaddset(&set, SIGUSR1);
-      // sigaddset(&set, SIGSTOP);
-      // sigaddset(&set, SIGCONT);
-
-      if (sigprocmask(SIG_BLOCK, &set, NULL) == -1) {
-          perror("sigprocmask");
-          exit(EXIT_FAILURE);
+        process_list.processes = tmp;
       }
       pid_t pid = fork();
       if (pid < 0) {
@@ -162,6 +163,10 @@ int main(int argc, char* argv[]) {
     }
     free_str_list(&command_lines);
   }
+  if (sigprocmask(SIG_SETMASK, &oldset, NULL) == -1) {
+    perror("sigprocmask restore");
+    exit(EXIT_FAILURE);
+  }
   process_list.active = process_list.count;
 
   // sleep(1);
@@ -180,115 +185,93 @@ int main(int argc, char* argv[]) {
   }
   process_list.processes[current].status = RUNNING;
 
+  sigset_t blockset;
 
+  sigemptyset(&blockset);
+  sigemptyset(&oldset);
+  sigaddset(&blockset, SIGALRM);
+
+  if (sigprocmask(SIG_BLOCK, &blockset, &oldset) == -1) {
+    perror("sigprocmask block");
+    free(line);
+    free_process_list(&process_list);
+    fclose(in);
+    return 1;
+  }
   struct sigaction sa = {0};
   sa.sa_handler = handle_alarm;
-  sigaction(SIGALRM, &sa, NULL);
+  if (sigaction(SIGALRM, &sa, NULL) == -1) {
+    perror("sigaction");
+    free(line);
+    free_process_list(&process_list);
+    fclose(in);
+    return 1;
+  }
 
-  alarm(1);
+  sigset_t suspend_mask = oldset;
+  sigdelset(&suspend_mask, SIGALRM);
+
+  alarm(2);
   while (process_list.active > 0) {
-    if (!alarm_fired) pause();
-
-
-    if (alarm_fired) {
-      alarm_fired = 0;
-      printf("[MCP] alarm fired, time slice expired for PID %d\n", process_list.processes[current].pid);
-      reap_exited(&process_list);
-      // need to check if current process is still running
-      // int exited = is_process_exited(process_list.processes[current].pid);
-      // if (exited == -1) {
-      //   perror("is_process_exited");
-      // }
+    while (!alarm_fired) {
+      if (sigsuspend(&suspend_mask) == -1) {
+        perror("sigsuspend");
+        exit(EXIT_FAILURE);
+      }
+    }
+    alarm_fired = 0;
+    printf("[MCP] alarm fired, time slice expired for PID %d\n", process_list.processes[current].pid);
+    reap_exited(&process_list);
+    // need to check if current process is still running
+    // int exited = is_process_exited(process_list.processes[current].pid);
+    // if (exited == -1) {
+    //   perror("is_process_exited");
+    // }
+    if (process_list.processes[current].status != EXITED) {
       printf("[MCP] stopping PID %d\n", process_list.processes[current].pid);
-      if (process_list.processes[current].status != EXITED) {
-        if (kill(process_list.processes[current].pid, SIGSTOP) == -1) {
-          perror("kill SIGSTOP");
-        }
+      if (kill(process_list.processes[current].pid, SIGSTOP) == -1) {
+        perror("kill SIGSTOP");
+      }
+      else {
         process_list.processes[current].status = STOPPED;
       }
-      // else if (exited == 1) {
-      //   if (kill(process_list.processes[current].pid, SIGTERM) == -1) {
-      //     perror("kill SIGTERM");
-      //   }
-      //   mark_exited(&process_list, current);
-      // }
-      // else {
-      //   if (kill(process_list.processes[current].pid, SIGSTOP) == -1) {
-      //     perror("kill SIGSTOP");
-      //   }
-      //   process_list.processes[current].status = STOPPED;
-      // }
-
-      reap_exited(&process_list);
-      // find next process
-      current = find_next_runnable(&process_list, current);
-      if (current == -1) {
-        continue;
-      }
-      printf("[MCP] next runnable process is PID %d\n", process_list.processes[current].pid);
-      // based on the current state, determine signal to send
-      // NEVER_RUN -> SIGUSR1
-      //
-      if (process_list.processes[current].status == NEVER_RUN) {
-        printf("[MCP] starting PID %d\n", process_list.processes[current].pid);
-        if (kill(process_list.processes[current].pid, SIGUSR1) == -1) {
-          perror("kill SIGUSR1");
-        }
-        process_list.processes[current].status = RUNNING;
-      }
-      else if (process_list.processes[current].status == STOPPED) {
-        printf("[MCP] continuing PID %d\n", process_list.processes[current].pid);
-        if (kill(process_list.processes[current].pid, SIGCONT) == -1) {
-          perror("kill SIGCONT");
-        }
-        process_list.processes[current].status = RUNNING;
-      }
-      alarm(2);
     }
+
+    reap_exited(&process_list);
+    // find next process
+    current = find_next_runnable(&process_list, current);
+    if (current == -1) {
+      continue;
+    }
+    printf("[MCP] next runnable process is PID %d\n", process_list.processes[current].pid);
+    // based on the current state, determine signal to send
+    // NEVER_RUN -> SIGUSR1
+    //
+    if (process_list.processes[current].status == NEVER_RUN) {
+      printf("[MCP] starting PID %d\n", process_list.processes[current].pid);
+      if (kill(process_list.processes[current].pid, SIGUSR1) == -1) {
+        perror("kill SIGUSR1");
+      }
+      else {
+        process_list.processes[current].status = RUNNING;
+      }
+    }
+    else if (process_list.processes[current].status == STOPPED) {
+      printf("[MCP] continuing PID %d\n", process_list.processes[current].pid);
+      if (kill(process_list.processes[current].pid, SIGCONT) == -1) {
+        perror("kill SIGCONT");
+      }
+      else {
+        process_list.processes[current].status = RUNNING;
+      }
+    }
+    alarm(2);
   }
-  printf("[MCP] all processes exited, MCP exiting");
+  printf("[MCP] all processes exited, MCP exiting\n");
   reap_exited(&process_list);
 
-  // for (int i = 0; i < processes; i++) {
-  //   if (kill(pid_array[i], SIGUSR1) == -1) {
-  //     perror("kill SIGUSR1");
-  //   }
-  // }
-  //
-
-
   // sleep(1);
 
-  // printf("[MCP] sending SIGSTOP to all children\n");
-  // for (int i = 0; i < processes; i++) {
-  //   if (kill(pid_array[i], SIGSTOP) == -1) {
-  //     perror("kill SIGSTOP");
-  //   }
-  // }
-
-  // sleep(1);
-
-  // printf("[MCP] sending SIGCONT to all children\n");
-  // for (int i = 0; i < processes; i++) {
-  //   if (kill(pid_array[i], SIGCONT) == -1) {
-  //     perror("kill SIGCONT");
-  //   }
-  // }
-
-  // printf("[MCP] waiting for all children to exit\n");
-  // for (int i = 0; i < processes; i++) {
-  //   int status;
-  //   pid_t done = waitpid(pid_array[i], &status, 0);
-  //   if (done == -1) {
-  //     perror("waitpid");
-  //     continue;
-  //   }
-  //   if (WIFEXITED(status)) {
-  //     printf("[MCP] child %d exited with status %d\n", done, WEXITSTATUS(status));
-  //   } else if (WIFSIGNALED(status)){
-  //     printf("[MCP] child %d terminated by signal %d\n", done, WTERMSIG(status));
-  //   }
-  // }
   // free_str_list(&args);
   // free_str_list(&command_lines);
   free(line);
