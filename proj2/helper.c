@@ -40,17 +40,24 @@ char *trim(char *s)
 
 int count_token (char* buf, const char* delim)
 {
-  if (buf == NULL) return 0;
-  int len = strlen(buf);
+  if (buf == NULL || delim == NULL) return 0;
+
+  char *copy = malloc(strlen(buf) + 1);
+  if (!copy) return 0;
+  strcpy(copy, buf);
+
   int result = 0;
+  char *token;
+  char *save = NULL;
 
-
-  for (int i = 0; i < len; ++i) {
-    if (i == 0 && buf[i] == *delim) continue;
-    if (i == len - 1 && buf[i] == *delim) break;
-    if (buf[i] == *delim) result++;
-    if (i == len - 1) result++;
+  for (token = strtok_r(copy, delim, &save); token != NULL; token = strtok_r(NULL, delim, &save)) {
+    token = trim(token);
+    if (strlen(token) > 0) {
+      result++;
+    }
   }
+
+  free(copy);
   return result;
 }
 
@@ -58,30 +65,48 @@ str_list str_tokenize(char* buf, const char* delim)
 {
   str_list result;
   result.list = NULL;
-  result.size = count_token(buf, delim);
-  result.list = malloc((result.size + 1) * sizeof(char *));
-  char *token;
-  char *save = buf;
-  int cur = 0;
+  result.size = 0;
 
-  while ((token = strtok_r(save, delim, &save))) {
-    token = trim(token);
-    if (strlen(token) < 1) continue;
-    result.list[cur] = malloc(strlen(token) + 1);
-    strcpy(result.list[cur], token);
-    cur++;
+  int capacity = count_token(buf, delim);
+  result.list = calloc((capacity + 1), sizeof(char *));
+  if (!result.list) {
+    perror("calloc");
+    return result;
   }
 
-  result.list[cur] = NULL;
+  char *token;
+  char *save = NULL;
+
+  for (token = strtok_r(buf, delim, &save); token != NULL; token = strtok_r(NULL, delim, &save)) {
+    token = trim(token);
+    if (strlen(token) < 1) continue;
+
+    result.list[result.size] = malloc(strlen(token) + 1);
+    if (!result.list[result.size]) {
+      perror("malloc");
+      free_str_list(&result);
+      result.list = NULL;
+      result.size = 0;
+      return result;
+    }
+
+    strcpy(result.list[result.size], token);
+    result.size++;
+  }
+
+  result.list[result.size] = NULL;
   return result;
 }
 
 
 void free_str_list(str_list *list) {
+  if (!list || !list->list) return;
   for (int i = 0; i < list->size; ++i) {
     free(list->list[i]);
   }
   free(list->list);
+  list->list = NULL;
+  list->size = 0;
 }
 
 
