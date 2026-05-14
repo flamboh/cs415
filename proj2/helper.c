@@ -83,3 +83,8 @@ void free_str_list(str_list *list) {
   }
   free(list->list);
 }
+
+
+void free_process_list(ProcessList *list) {
+  free(list->processes);
+}
