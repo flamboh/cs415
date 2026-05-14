@@ -19,13 +19,31 @@ int main(int argc,char*argv[])
 	*	#1	declare child process pool
 	*/
 	pid_t* pid_array = (pid_t*)malloc(sizeof(pid_t) * atoi(argv[1]));
+	if (pid_array == NULL)
+	{
+		perror ("malloc: ");
+		exit(1);
+	}
+
 	/*	#2 	spawn n new processes
 	*		first create the argument needed for the processes
 	*		for example "./iobound -seconds 10"
 	*/
-	for (int i = 0; i < atoi(argv[1]); i++)
+	int n = atoi(argv[1]);
+	if (n < 1)
 	{
-		pid_array[i] = fork();
+		printf ("Invalid input\n");
+		exit(1);
+	}
+	for (int i = 0; i < n; i++)
+	{
+		pid_t pid = fork();
+		if (pid == -1)
+		{
+			perror ("fork: ");
+			exit(1);
+		}
+		pid_array[i] = pid;
 		if (pid_array[i] == 0)
 		{
 			char* iobound_arg[] = {"./iobound", "-seconds", "10", NULL};
