@@ -1,0 +1,252 @@
+==2424020== Memcheck, a memory error detector
+==2424020== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==2424020== Using Valgrind-3.18.1 and LibVEX; rerun with -h for copyright info
+==2424020== Command: ./part4 -f input.txt
+==2424020== 
+test_script.sh
+proj2.md
+part4.o
+part4.c
+part4
+part3.o
+part3.c
+part3
+part2.o
+part2.c
+part2
+part1.o
+part1.c
+part1
+logs
+iobound.o
+iobound.c
+iobound
+input_builddir.txt
+input.txt
+helper.o
+helper.h
+helper.c
+cpubound.o
+cpubound.c
+cpubound
+build
+Makefile.builddir
+Makefile
+.nfs000000000001a4a700000ac4
+.nfs000000000001a43500000ac7
+.nfs000000000001a06500000aac
+.nfs0000000000019cf000000ac2
+..
+.
+execvp: No such file or directory
+[child 2424105] assigned: invalid, from command_lines.list[0]
+[child 2424105] received SIGUSR1, execing invalid
+==2424105== 
+==2424105== HEAP SUMMARY:
+==2424105==     in use at exit: 0 bytes in 0 blocks
+==2424105==   total heap usage: 28 allocs, 28 frees, 17,275 bytes allocated
+==2424105== 
+==2424105== All heap blocks were freed -- no leaks are possible
+==2424105== 
+==2424105== For lists of detected and suppressed errors, rerun with: -s
+==2424105== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+[MCP] 5 processes forked and waiting for scheduler
+[MCP] scheduler starting
+[MCP] starting PID 2424103
+[MCP] child 2424103 exited with status 0
+[MCP] PID 2424103 exited before its time slice expired
+[MCP] === Process status ===
+PID      STATUS     PROC_STATE         RSS_KB      VOL_CTX    INVOL_CTX    SYS_READS   SYS_WRITES   READ_BYTES  WRITE_BYTES NOTE
+-------- ---------- -------------- ---------- ------------ ------------ ------------ ------------ ------------ ------------ ----------------
+2424103  EXITED     -                       -            -            -            -            -            -            - proc unavailable
+2424104  NEVER_RUN  S (sleeping)        45916            1            0            1            2            0            0 
+2424105  NEVER_RUN  S (sleeping)        45920            1            0            1            2            0            0 
+2424106  NEVER_RUN  S (sleeping)        45920            1            0            1            2            0            0 
+2424107  NEVER_RUN  S (sleeping)        45924            1            2            1            2            0            0 
+[MCP] === Process status ===
+[MCP] next runnable process is PID 2424104
+[MCP] starting PID 2424104
+[MCP] child 2424104 exited with status 0
+[MCP] PID 2424104 exited before its time slice expired
+[MCP] === Process status ===
+PID      STATUS     PROC_STATE         RSS_KB      VOL_CTX    INVOL_CTX    SYS_READS   SYS_WRITES   READ_BYTES  WRITE_BYTES NOTE
+-------- ---------- -------------- ---------- ------------ ------------ ------------ ------------ ------------ ------------ ----------------
+2424103  EXITED     -                       -            -            -            -            -            -            - proc unavailable
+2424104  EXITED     -                       -            -            -            -            -            -            - proc unavailable
+2424105  NEVER_RUN  S (sleeping)        45920            1            0            1            2            0            0 
+2424106  NEVER_RUN  S (sleeping)        45920            1            0            1            2            0            0 
+2424107  NEVER_RUN  S (sleeping)        45924            1            2            1            2            0            0 
+[MCP] === Process status ===
+[MCP] next runnable process is PID 2424105
+[MCP] starting PID 2424105
+[MCP] child 2424105 exited with status 1
+[MCP] PID 2424105 exited before its time slice expired
+[MCP] === Process status ===
+PID      STATUS     PROC_STATE         RSS_KB      VOL_CTX    INVOL_CTX    SYS_READS   SYS_WRITES   READ_BYTES  WRITE_BYTES NOTE
+-------- ---------- -------------- ---------- ------------ ------------ ------------ ------------ ------------ ------------ ----------------
+2424103  EXITED     -                       -            -            -            -            -            -            - proc unavailable
+2424104  EXITED     -                       -            -            -            -            -            -            - proc unavailable
+2424105  EXITED     -                       -            -            -            -            -            -            - proc unavailable
+2424106  NEVER_RUN  S (sleeping)        45920            1            0            1            2            0            0 
+2424107  NEVER_RUN  S (sleeping)        45924            1            2            1            2            0            0 
+[MCP] === Process status ===
+[MCP] next runnable process is PID 2424106
+[MCP] starting PID 2424106
+[MCP] alarm fired, time slice expired for PID 2424106
+[MCP] stopping PID 2424106
+[MCP] === Process status ===
+PID      STATUS     PROC_STATE         RSS_KB      VOL_CTX    INVOL_CTX    SYS_READS   SYS_WRITES   READ_BYTES  WRITE_BYTES NOTE
+-------- ---------- -------------- ---------- ------------ ------------ ------------ ------------ ------------ ------------ ----------------
+2424103  EXITED     -                       -            -            -            -            -            -            - proc unavailable
+2424104  EXITED     -                       -            -            -            -            -            -            - proc unavailable
+2424105  EXITED     -                       -            -            -            -            -            -            - proc unavailable
+2424106  STOPPED    T (stopped)           864            7            7           13       208799         3196            0 
+2424107  NEVER_RUN  S (sleeping)        45924            1            2            1            2            0            0 
+[MCP] === Process status ===
+[MCP] next runnable process is PID 2424107
+[MCP] starting PID 2424107
+[MCP] alarm fired, time slice expired for PID 2424107
+[MCP] stopping PID 2424107
+[MCP] === Process status ===
+PID      STATUS     PROC_STATE         RSS_KB      VOL_CTX    INVOL_CTX    SYS_READS   SYS_WRITES   READ_BYTES  WRITE_BYTES NOTE
+-------- ---------- -------------- ---------- ------------ ------------ ------------ ------------ ------------ ------------ ----------------
+2424103  EXITED     -                       -            -            -            -            -            -            - proc unavailable
+2424104  EXITED     -                       -            -            -            -            -            -            - proc unavailable
+2424105  EXITED     -                       -            -            -            -            -            -            - proc unavailable
+2424106  STOPPED    T (stopped)           864            7            7           13       208799         3196            0 
+2424107  STOPPED    T (stopped)           860            5            6           13            2         3196            0 
+[MCP] === Process status ===
+[MCP] next runnable process is PID 2424106
+[MCP] continuing PID 2424106
+[MCP] alarm fired, time slice expired for PID 2424106
+[MCP] stopping PID 2424106
+[MCP] === Process status ===
+PID      STATUS     PROC_STATE         RSS_KB      VOL_CTX    INVOL_CTX    SYS_READS   SYS_WRITES   READ_BYTES  WRITE_BYTES NOTE
+-------- ---------- -------------- ---------- ------------ ------------ ------------ ------------ ------------ ------------ ----------------
+2424103  EXITED     -                       -            -            -            -            -            -            - proc unavailable
+2424104  EXITED     -                       -            -            -            -            -            -            - proc unavailable
+2424105  EXITED     -                       -            -            -            -            -            -            - proc unavailable
+2424106  STOPPED    T (stopped)           864            8           12           13       422532         3196            0 
+2424107  STOPPED    T (stopped)           860            5            6           13            2         3196            0 
+[MCP] === Process status ===
+[MCP] next runnable process is PID 2424107
+[MCP] continuing PID 2424107
+[MCP] alarm fired, time slice expired for PID 2424107
+[MCP] stopping PID 2424107
+[MCP] === Process status ===
+PID      STATUS     PROC_STATE         RSS_KB      VOL_CTX    INVOL_CTX    SYS_READS   SYS_WRITES   READ_BYTES  WRITE_BYTES NOTE
+-------- ---------- -------------- ---------- ------------ ------------ ------------ ------------ ------------ ------------ ----------------
+2424103  EXITED     -                       -            -            -            -            -            -            - proc unavailable
+2424104  EXITED     -                       -            -            -            -            -            -            - proc unavailable
+2424105  EXITED     -                       -            -            -            -            -            -            - proc unavailable
+2424106  STOPPED    T (stopped)           864            8           12           13       422532         3196            0 
+2424107  STOPPED    T (stopped)           860            6            6           13            2         3196            0 
+[MCP] === Process status ===
+[MCP] next runnable process is PID 2424106
+[MCP] continuing PID 2424106
+[MCP] alarm fired, timProcess: 2424106 - Beginning to write to file.
+Process: 2424106 - Finished.
+Process: 2424107 - Beginning calculation.
+Process: 2424107 - Finished.
+e slice expired for PID 2424106
+[MCP] stopping PID 2424106
+[MCP] === Process status ===
+PID      STATUS     PROC_STATE         RSS_KB      VOL_CTX    INVOL_CTX    SYS_READS   SYS_WRITES   READ_BYTES  WRITE_BYTES NOTE
+-------- ---------- -------------- ---------- ------------ ------------ ------------ ------------ ------------ ------------ ----------------
+2424103  EXITED     -                       -            -            -            -            -            -            - proc unavailable
+2424104  EXITED     -                       -            -            -            -            -            -            - proc unavailable
+2424105  EXITED     -                       -            -            -            -            -            -            - proc unavailable
+2424106  STOPPED    T (stopped)           864            9           17           13       636096         3196            0 
+2424107  STOPPED    T (stopped)           860            6            6           13            2         3196            0 
+[MCP] === Process status ===
+[MCP] next runnable process is PID 2424107
+[MCP] continuing PID 2424107
+[MCP] alarm fired, time slice expired for PID 2424107
+[MCP] stopping PID 2424107
+[MCP] === Process status ===
+PID      STATUS     PROC_STATE         RSS_KB      VOL_CTX    INVOL_CTX    SYS_READS   SYS_WRITES   READ_BYTES  WRITE_BYTES NOTE
+-------- ---------- -------------- ---------- ------------ ------------ ------------ ------------ ------------ ------------ ----------------
+2424103  EXITED     -                       -            -            -            -            -            -            - proc unavailable
+2424104  EXITED     -                       -            -            -            -            -            -            - proc unavailable
+2424105  EXITED     -                       -            -            -            -            -            -            - proc unavailable
+2424106  STOPPED    T (stopped)           864            9           17           13       636096         3196            0 
+2424107  STOPPED    T (stopped)           860            7            6           13            2         3196            0 
+[MCP] === Process status ===
+[MCP] next runnable process is PID 2424106
+[MCP] continuing PID 2424106
+[MCP] alarm fired, time slice expired for PID 2424106
+[MCP] stopping PID 2424106
+[MCP] === Process status ===
+PID      STATUS     PROC_STATE         RSS_KB      VOL_CTX    INVOL_CTX    SYS_READS   SYS_WRITES   READ_BYTES  WRITE_BYTES NOTE
+-------- ---------- -------------- ---------- ------------ ------------ ------------ ------------ ------------ ------------ ----------------
+2424103  EXITED     -                       -            -            -            -            -            -            - proc unavailable
+2424104  EXITED     -                       -            -            -            -            -            -            - proc unavailable
+2424105  EXITED     -                       -            -            -            -            -            -            - proc unavailable
+2424106  STOPPED    T (stopped)           864           10           21           13       848470         3196            0 
+2424107  STOPPED    T (stopped)           860            7            6           13            2         3196            0 
+[MCP] === Process status ===
+[MCP] next runnable process is PID 2424107
+[MCP] continuing PID 2424107
+[MCP] alarm fired, time slice expired for PID 2424107
+[MCP] stopping PID 2424107
+[MCP] === Process status ===
+PID      STATUS     PROC_STATE         RSS_KB      VOL_CTX    INVOL_CTX    SYS_READS   SYS_WRITES   READ_BYTES  WRITE_BYTES NOTE
+-------- ---------- -------------- ---------- ------------ ------------ ------------ ------------ ------------ ------------ ----------------
+2424103  EXITED     -                       -            -            -            -            -            -            - proc unavailable
+2424104  EXITED     -                       -            -            -            -            -            -            - proc unavailable
+2424105  EXITED     -                       -            -            -            -            -            -            - proc unavailable
+2424106  STOPPED    T (stopped)           864           10           21           13       848470         3196            0 
+2424107  STOPPED    T (stopped)           860            8           16           13            2         3196            0 
+[MCP] === Process status ===
+[MCP] next runnable process is PID 2424106
+[MCP] continuing PID 2424106
+[MCP] alarm fired, time slice expired for PID 2424106
+[MCP] stopping PID 2424106
+[MCP] === Process status ===
+PID      STATUS     PROC_STATE         RSS_KB      VOL_CTX    INVOL_CTX    SYS_READS   SYS_WRITES   READ_BYTES  WRITE_BYTES NOTE
+-------- ---------- -------------- ---------- ------------ ------------ ------------ ------------ ------------ ------------ ----------------
+2424103  EXITED     -                       -            -            -            -            -            -            - proc unavailable
+2424104  EXITED     -                       -            -            -            -            -            -            - proc unavailable
+2424105  EXITED     -                       -            -            -            -            -            -            - proc unavailable
+2424106  STOPPED    T (stopped)           864           11           25           13      1062442         3196            0 
+2424107  STOPPED    T (stopped)           860            8           16           13            2         3196            0 
+[MCP] === Process status ===
+[MCP] next runnable process is PID 2424107
+[MCP] continuing PID 2424107
+[MCP] alarm fired, time slice expired for PID 2424107
+[MCP] stopping PID 2424107
+[MCP] === Process status ===
+PID      STATUS     PROC_STATE         RSS_KB      VOL_CTX    INVOL_CTX    SYS_READS   SYS_WRITES   READ_BYTES  WRITE_BYTES NOTE
+-------- ---------- -------------- ---------- ------------ ------------ ------------ ------------ ------------ ------------ ----------------
+2424103  EXITED     -                       -            -            -            -            -            -            - proc unavailable
+2424104  EXITED     -                       -            -            -            -            -            -            - proc unavailable
+2424105  EXITED     -                       -            -            -            -            -            -            - proc unavailable
+2424106  STOPPED    T (stopped)           864           11           25           13      1062442         3196            0 
+2424107  STOPPED    T (stopped)           860            9           23           13            2         3196            0 
+[MCP] === Process status ===
+[MCP] next runnable process is PID 2424106
+[MCP] continuing PID 2424106
+[MCP] child 2424106 exited with status 0
+[MCP] PID 2424106 exited before its time slice expired
+[MCP] === Process status ===
+PID      STATUS     PROC_STATE         RSS_KB      VOL_CTX    INVOL_CTX    SYS_READS   SYS_WRITES   READ_BYTES  WRITE_BYTES NOTE
+-------- ---------- -------------- ---------- ------------ ------------ ------------ ------------ ------------ ------------ ----------------
+2424103  EXITED     -                       -            -            -            -            -            -            - proc unavailable
+2424104  EXITED     -                       -            -            -            -            -            -            - proc unavailable
+2424105  EXITED     -                       -            -            -            -            -            -            - proc unavailable
+2424106  EXITED     -                       -            -            -            -            -            -            - proc unavailable
+2424107  STOPPED    T (stopped)           860            9           23           13            2         3196            0 
+[MCP] === Process status ===
+[MCP] next runnable process is PID 2424107
+[MCP] continuing PID 2424107
+[MCP] child 2424107 exited with status 0
+[MCP] all processes exited, MCP exiting
+==2424020== 
+==2424020== HEAP SUMMARY:
+==2424020==     in use at exit: 0 bytes in 0 blocks
+==2424020==   total heap usage: 245 allocs, 245 frees, 145,121 bytes allocated
+==2424020== 
+==2424020== All heap blocks were freed -- no leaks are possible
+==2424020== 
+==2424020== For lists of detected and suppressed errors, rerun with: -s
+==2424020== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)

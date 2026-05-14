@@ -1,0 +1,75 @@
+==2422482== Memcheck, a memory error detector
+==2422482== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==2422482== Using Valgrind-3.18.1 and LibVEX; rerun with -h for copyright info
+==2422482== Command: ./part2 -f input.txt
+==2422482== 
+test_script.sh
+proj2.md
+part4.o
+part4.c
+part4
+part3.o
+part3.c
+part3
+part2.o
+part2.c
+part2
+part1.o
+part1.c
+part1
+logs
+iobound.o
+iobound.c
+iobound
+input_builddir.txt
+input.txt
+helper.o
+helper.h
+helper.c
+cpubound.o
+cpubound.c
+cpubound
+build
+Makefile.builddir
+Makefile
+.nfs000000000001a4a700000ac4
+.nfs000000000001a43500000ac7
+.nfs000000000001a06500000aac
+.nfs0000000000019cf000000ac2
+..
+.
+execvp: No such file or directory
+[child 2422485] executing: invalid, from command_lines.list[0]
+[child 2422485] received SIGUSR1, execing invalid
+==2422485== 
+==2422485== HEAP SUMMARY:
+==2422485==     in use at exit: 0 bytes in 0 blocks
+==2422485==   total heap usage: 28 allocs, 28 frees, 17,251 bytes allocated
+==2422485== 
+==2422485== All heap blocks were freed -- no leaks are possible
+==2422485== 
+==2422485== For lists of detected and suppressed errors, rerun with: -s
+==2422485== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+Process: 2422486 - Beginning to write to file.
+Process: 2422486 - Finished.
+Process: 2422487 - Beginning calculation.
+Process: 2422487 - Finished.
+[MCP] 5 processes forked
+[MCP] sending SIGUSR1 to all children
+[MCP] sending SIGSTOP to all children
+[MCP] sending SIGCONT to all children
+[MCP] waiting for all children to exit
+[MCP] child 2422483 exited with status 0
+[MCP] child 2422484 exited with status 0
+[MCP] child 2422485 exited with status 1
+[MCP] child 2422486 exited with status 0
+[MCP] child 2422487 exited with status 0
+==2422482== 
+==2422482== HEAP SUMMARY:
+==2422482==     in use at exit: 0 bytes in 0 blocks
+==2422482==   total heap usage: 45 allocs, 45 frees, 17,545 bytes allocated
+==2422482== 
+==2422482== All heap blocks were freed -- no leaks are possible
+==2422482== 
+==2422482== For lists of detected and suppressed errors, rerun with: -s
+==2422482== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)

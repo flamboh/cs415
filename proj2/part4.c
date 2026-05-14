@@ -345,8 +345,8 @@ int main(int argc, char* argv[]) {
 
   sleep(1);
 
-  printf("[MCP] %d processes forked\n", process_list.count);
-  printf("[MCP] sending SIGUSR1 to all children\n");
+  printf("[MCP] %d processes forked and waiting for scheduler\n", process_list.count);
+  printf("[MCP] scheduler starting\n");
   if (process_list.active == 0) {
     free(line);
     free_process_list(&process_list);

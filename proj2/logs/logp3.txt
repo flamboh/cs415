@@ -1,0 +1,126 @@
+==2421366== Memcheck, a memory error detector
+==2421366== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==2421366== Using Valgrind-3.18.1 and LibVEX; rerun with -h for copyright info
+==2421366== Command: ./part3 -f input.txt
+==2421366== 
+test_script.sh
+proj2.md
+part4.o
+part4.c
+part4
+part3.o
+part3.c
+part3
+part2.o
+part2.c
+part2
+part1.o
+part1.c
+part1
+logs
+iobound.o
+iobound.c
+iobound
+input_builddir.txt
+input.txt
+helper.o
+helper.h
+helper.c
+cpubound.o
+cpubound.c
+cpubound
+build
+Makefile.builddir
+Makefile
+.nfs000000000001a4a700000ac4
+.nfs000000000001a43500000ac7
+.nfs000000000001a06500000aac
+.nfs0000000000019cf000000ac2
+..
+.
+execvp: No such file or directory
+[child 2421454] executing: invalid, from command_lines.list[0]
+[child 2421454] received SIGUSR1, execing invalid
+==2421454== 
+==2421454== HEAP SUMMARY:
+==2421454==     in use at exit: 0 bytes in 0 blocks
+==2421454==   total heap usage: 28 allocs, 28 frees, 17,275 bytes allocated
+==2421454== 
+==2421454== All heap blocks were freed -- no leaks are possible
+==2421454== 
+==2421454== For lists of detected and suppressed errors, rerun with: -s
+==2421454== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+Process: 2421455 - Beginning to write to file.
+Process: 2421455 - Finished.
+Process: 2421456 - Beginning calculation.
+Process: 2421456 - Finished.
+[MCP] 5 processes forked and waiting for scheduler
+[MCP] scheduler starting
+[MCP] starting PID 2421452
+[MCP] child 2421452 exited with status 0
+[MCP] PID 2421452 exited before its time slice expired
+[MCP] next runnable process is PID 2421453
+[MCP] starting PID 2421453
+[MCP] child 2421453 exited with status 0
+[MCP] PID 2421453 exited before its time slice expired
+[MCP] next runnable process is PID 2421454
+[MCP] starting PID 2421454
+[MCP] child 2421454 exited with status 1
+[MCP] PID 2421454 exited before its time slice expired
+[MCP] next runnable process is PID 2421455
+[MCP] starting PID 2421455
+[MCP] alarm fired, time slice expired for PID 2421455
+[MCP] stopping PID 2421455
+[MCP] next runnable process is PID 2421456
+[MCP] starting PID 2421456
+[MCP] alarm fired, time slice expired for PID 2421456
+[MCP] stopping PID 2421456
+[MCP] next runnable process is PID 2421455
+[MCP] continuing PID 2421455
+[MCP] alarm fired, time slice expired for PID 2421455
+[MCP] stopping PID 2421455
+[MCP] next runnable process is PID 2421456
+[MCP] continuing PID 2421456
+[MCP] alarm fired, time slice expired for PID 2421456
+[MCP] stopping PID 2421456
+[MCP] next runnable process is PID 2421455
+[MCP] continuing PID 2421455
+[MCP] alarm fired, time slice expired for PID 2421455
+[MCP] stopping PID 2421455
+[MCP] next runnable process is PID 2421456
+[MCP] continuing PID 2421456
+[MCP] alarm fired, time slice expired for PID 2421456
+[MCP] stopping PID 2421456
+[MCP] next runnable process is PID 2421455
+[MCP] continuing PID 2421455
+[MCP] alarm fired, time slice expired for PID 2421455
+[MCP] stopping PID 2421455
+[MCP] next runnable process is PID 2421456
+[MCP] continuing PID 2421456
+[MCP] alarm fired, time slice expired for PID 2421456
+[MCP] stopping PID 2421456
+[MCP] next runnable process is PID 2421455
+[MCP] continuing PID 2421455
+[MCP] alarm fired, time slice expired for PID 2421455
+[MCP] stopping PID 2421455
+[MCP] next runnable process is PID 2421456
+[MCP] continuing PID 2421456
+[MCP] alarm fired, time slice expired for PID 2421456
+[MCP] stopping PID 2421456
+[MCP] next runnable process is PID 2421455
+[MCP] continuing PID 2421455
+[MCP] child 2421455 exited with status 0
+[MCP] PID 2421455 exited before its time slice expired
+[MCP] next runnable process is PID 2421456
+[MCP] continuing PID 2421456
+[MCP] child 2421456 exited with status 0
+[MCP] all processes exited, MCP exiting
+==2421366== 
+==2421366== HEAP SUMMARY:
+==2421366==     in use at exit: 0 bytes in 0 blocks
+==2421366==   total heap usage: 45 allocs, 45 frees, 17,601 bytes allocated
+==2421366== 
+==2421366== All heap blocks were freed -- no leaks are possible
+==2421366== 
+==2421366== For lists of detected and suppressed errors, rerun with: -s
+==2421366== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
