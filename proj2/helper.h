@@ -1,6 +1,6 @@
 #ifndef HELPER_H
 #define HELPER_H
-#include <stdlib.h>
+#include <sys/types.h>
 
 typedef struct
 {

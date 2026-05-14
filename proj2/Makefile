@@ -4,7 +4,7 @@ CFLAGS = -Wall -Wextra -g -ggdb3
 HELPERS = helper.c
 HELPER_OBJS = helper.o
 
-HELPER_PROGRAMS = part1 part2 part3
+HELPER_PROGRAMS = part1 part2 part3 part4
 STANDALONE_PROGRAMS = cpubound iobound
 
 PROGRAMS = $(HELPER_PROGRAMS) $(STANDALONE_PROGRAMS)

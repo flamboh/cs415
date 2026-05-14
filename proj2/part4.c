@@ -74,6 +74,163 @@ void reap_exited(ProcessList* process_list) {
   }
 }
 
+typedef struct {
+  int available;
+  unsigned long long syscr;
+  unsigned long long syscw;
+  unsigned long long read_bytes;
+  unsigned long long write_bytes;
+} ProcIO;
+
+typedef struct {
+  int available;
+  char state[64];
+  unsigned long vmrss_kb;
+  unsigned long voluntary_ctxt_switches;
+  unsigned long nonvoluntary_ctxt_switches;
+} ProcStatus;
+
+ProcIO read_io(pid_t pid) {
+  ProcIO io = {0, 0, 0, 0, 0};
+  char path[64];
+  char line[256];
+
+  snprintf(path, sizeof(path), "/proc/%d/io", pid);
+  FILE* fp = fopen(path, "r");
+  if (!fp) {
+    return io;
+  }
+
+  io.available = 1;
+  while (fgets(line, sizeof(line), fp)) {
+    sscanf(line, "syscr: %llu", &io.syscr);
+    sscanf(line, "syscw: %llu", &io.syscw);
+    sscanf(line, "read_bytes: %llu", &io.read_bytes);
+    sscanf(line, "write_bytes: %llu", &io.write_bytes);
+  }
+
+  fclose(fp);
+  return io;
+}
+
+ProcStatus read_status(pid_t pid) {
+  ProcStatus status = {0, "unknown", 0, 0, 0};
+  char path[64];
+  char line[256];
+
+  snprintf(path, sizeof(path), "/proc/%d/status", pid);
+  FILE* fp = fopen(path, "r");
+  if (!fp) {
+    return status;
+  }
+
+  status.available = 1;
+  while (fgets(line, sizeof(line), fp)) {
+    if (strncmp(line, "State:", 6) == 0) {
+      sscanf(line, "State:\t%63[^\n]", status.state);
+    }
+    else if (strncmp(line, "VmRSS:", 6) == 0) {
+      sscanf(line, "VmRSS: %lu kB", &status.vmrss_kb);
+    }
+    else if (strncmp(line, "voluntary_ctxt_switches:", 24) == 0) {
+      sscanf(line, "voluntary_ctxt_switches: %lu", &status.voluntary_ctxt_switches);
+    }
+    else if (strncmp(line, "nonvoluntary_ctxt_switches:", 27) == 0) {
+      sscanf(line, "nonvoluntary_ctxt_switches: %lu", &status.nonvoluntary_ctxt_switches);
+    }
+  }
+
+  fclose(fp);
+  return status;
+}
+
+void print_status(const ProcessList* process_list) {
+  printf("[MCP] === Process status ===\n");
+  printf("%-8s %-10s %-14s %10s %12s %12s %12s %12s %12s %12s %s\n",
+         "PID",
+         "STATUS",
+         "PROC_STATE",
+         "RSS_KB",
+         "VOL_CTX",
+         "INVOL_CTX",
+         "SYS_READS",
+         "SYS_WRITES",
+         "READ_BYTES",
+         "WRITE_BYTES",
+         "NOTE");
+  printf("%-8s %-10s %-14s %10s %12s %12s %12s %12s %12s %12s %s\n",
+         "--------",
+         "----------",
+         "--------------",
+         "----------",
+         "------------",
+         "------------",
+         "------------",
+         "------------",
+         "------------",
+         "------------",
+         "----------------");
+
+  for (int i = 0; i < process_list->count; i++) {
+    int status = process_list->processes[i].status;
+    char* status_str;
+    if (status == EXITED) {
+      status_str = "EXITED";
+    }
+    else if (status == STOPPED) {
+      status_str = "STOPPED";
+    }
+    else if (status == NEVER_RUN) {
+      status_str = "NEVER_RUN";
+    }
+    else {
+      status_str = "RUNNING";
+    }
+
+    pid_t pid = process_list->processes[i].pid;
+    ProcIO io = read_io(pid);
+    ProcStatus proc_status = read_status(pid);
+    const char* note = "";
+
+    if (!io.available && !proc_status.available) {
+      note = "proc unavailable";
+    }
+    else if (!proc_status.available) {
+      note = "status unavailable";
+    }
+    else if (!io.available) {
+      note = "io unavailable";
+    }
+
+    printf("%-8d %-10s ", pid, status_str);
+
+    if (proc_status.available) {
+      printf("%-14s %10lu %12lu %12lu ",
+             proc_status.state,
+             proc_status.vmrss_kb,
+             proc_status.voluntary_ctxt_switches,
+             proc_status.nonvoluntary_ctxt_switches);
+    }
+    else {
+      printf("%-14s %10s %12s %12s ", "-", "-", "-", "-");
+    }
+
+    if (io.available) {
+      printf("%12llu %12llu %12llu %12llu ",
+             io.syscr,
+             io.syscw,
+             io.read_bytes,
+             io.write_bytes);
+    }
+    else {
+      printf("%12s %12s %12s %12s ", "-", "-", "-", "-");
+    }
+
+    printf("%s\n", note);
+  }
+  printf("[MCP] === Process status ===\n");
+}
+
 int main(int argc, char* argv[]) {
   FILE* in;
   if (argc != 3 || strcmp(argv[1], "-f") != 0) {
@@ -132,7 +289,7 @@ int main(int argc, char* argv[]) {
         continue;
       }
       if (pid == 0) {
-        printf("[child %d] executing: %s, from command_lines.list[%d]\n", getpid(), command_lines.list[i], i);
+        printf("[child %d] assigned: %s, from command_lines.list[%d]\n", getpid(), command_lines.list[i], i);
         int sig;
         if(sigwait(&set, &sig) != 0) {
           fprintf(stderr, "sigwait failed\n");
@@ -171,7 +328,7 @@ int main(int argc, char* argv[]) {
   }
   process_list.active = process_list.count;
 
-  // sleep(1);
+  sleep(1);
 
   printf("[MCP] %d processes forked\n", process_list.count);
   printf("[MCP] sending SIGUSR1 to all children\n");
@@ -238,6 +395,8 @@ int main(int argc, char* argv[]) {
         process_list.processes[current].status = STOPPED;
       }
     }
+
+    print_status(&process_list);
 
     reap_exited(&process_list);
     // find next process
