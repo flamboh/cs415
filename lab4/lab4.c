@@ -57,11 +57,11 @@ int main(int argc,char*argv[])
 	}
 	/*	#3	call script_print
 	*/
-	script_print(pid_array, atoi(argv[1]));
+	script_print(pid_array, n);
 	/*
 	*	#4	wait for children processes to finish
 	*/
-	for (int i = 0; i < atoi(argv[1]); i++)
+	for (int i = 0; i < n; i++)
 	{
 		waitpid(pid_array[i], NULL, 0);
 	}
