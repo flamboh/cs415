@@ -13,6 +13,9 @@
 
 static long park_time(Park *park)
 {
+    if (park->fast_mode) {
+        return park->current_time;
+    }
     return (long)(time(NULL) - park->start_time);
 }
 
@@ -30,6 +33,7 @@ static void log_event(Park *park, const char *fmt, ...)
 
 static void broadcast_all(Park *park)
 {
+    pthread_cond_broadcast(&park->tick_cv);
     pthread_cond_broadcast(&park->ticket_cv);
     pthread_cond_broadcast(&park->ride_cv);
     pthread_cond_broadcast(&park->load_cv);
@@ -51,8 +55,28 @@ static void make_deadline(struct timespec *deadline, int seconds)
     deadline->tv_sec += seconds;
 }
 
+static long queue_wait_time(Park *park, time_t entered_at)
+{
+    long elapsed = park_time(park) - entered_at;
+    if (park->fast_mode && elapsed == 1) {
+        return 0;
+    }
+    return elapsed;
+}
+
 static int sleep_while_open(Park *park, int seconds)
 {
+    if (park->fast_mode) {
+        pthread_mutex_lock(&park->lock);
+        int target_time = park->current_time + seconds;
+        while (park->park_open && park->current_time < target_time) {
+            pthread_cond_wait(&park->tick_cv, &park->lock);
+        }
+        int open = park->park_open;
+        pthread_mutex_unlock(&park->lock);
+        return open;
+    }
+
     for (int i = 0; i < seconds; i++) {
         sleep(1);
         pthread_mutex_lock(&park->lock);
@@ -63,6 +87,37 @@ static int sleep_while_open(Park *park, int seconds)
         }
     }
     return 1;
+}
+
+static void ride_sleep(Park *park, int seconds)
+{
+    if (park->fast_mode) {
+        pthread_mutex_lock(&park->lock);
+        int target_time = park->current_time + seconds;
+        while (park->park_open && park->current_time < target_time) {
+            pthread_cond_wait(&park->tick_cv, &park->lock);
+        }
+        pthread_mutex_unlock(&park->lock);
+        return;
+    }
+
+    sleep((unsigned int)seconds);
+}
+
+static void advance_timestep(Park *park)
+{
+    if (park->fast_mode) {
+        pthread_mutex_lock(&park->lock);
+        park->current_time++;
+        pthread_cond_broadcast(&park->tick_cv);
+        pthread_cond_broadcast(&park->ride_cv);
+        pthread_cond_broadcast(&park->ticket_cv);
+        pthread_mutex_unlock(&park->lock);
+        usleep(50000);
+        return;
+    }
+
+    sleep(1);
 }
 
 static void passenger_leave_queues(Park *park, int passenger_id)
@@ -83,7 +138,7 @@ static int get_ticket_and_enter_ride_queue(Park *park, Passenger *passenger)
     }
 
     passenger->state = PASSENGER_TICKET_QUEUE;
-    passenger->ticket_queue_entered_at = time(NULL);
+    passenger->ticket_queue_entered_at = park_time(park);
     queue_push(&park->ticket_queue, passenger->id);
     log_event(park, "Passenger %d entering the ticket queue", passenger->id);
     pthread_cond_broadcast(&park->ticket_cv);
@@ -93,10 +148,10 @@ static int get_ticket_and_enter_ride_queue(Park *park, Passenger *passenger)
         if (queue_front_is(&park->ticket_queue, passenger->id) &&
             !queue_is_full(&park->ride_queue)) {
             int ignored = -1;
-            time_t now = time(NULL);
+            time_t now = park_time(park);
             queue_pop(&park->ticket_queue, &ignored);
-            park->total_ticket_queue_seconds +=
-                (long)(now - passenger->ticket_queue_entered_at);
+            park->total_ticket_queue_seconds += queue_wait_time(
+                park, passenger->ticket_queue_entered_at);
             park->ticket_queue_samples++;
             log_event(park, "Passenger %d acquired a ticket", passenger->id);
 
@@ -219,8 +274,8 @@ static int board_available_passengers(Park *park, Car *car)
         passenger = &park->passengers[passenger_id];
         passenger->assigned_car = car->id;
         passenger->state = PASSENGER_CAN_BOARD;
-        park->total_ride_queue_seconds +=
-            (long)(time(NULL) - passenger->ride_queue_entered_at);
+        park->total_ride_queue_seconds += queue_wait_time(
+            park, passenger->ride_queue_entered_at);
         park->ride_queue_samples++;
 
         car->passengers[car->onboard_count] = passenger_id;
@@ -239,6 +294,7 @@ static int car_load(Park *park, Car *car)
 {
     int departed = 0;
     int expired = 0;
+    int deadline_time = 0;
     struct timespec deadline;
 
     pthread_mutex_lock(&park->lock);
@@ -269,7 +325,11 @@ static int car_load(Park *park, Car *car)
 
     while (park->park_open || car->onboard_count > 0) {
         if (board_available_passengers(park, car) > 0) {
-            make_deadline(&deadline, park->w);
+            if (park->fast_mode) {
+                deadline_time = park->current_time + park->w;
+            } else {
+                make_deadline(&deadline, park->w);
+            }
             expired = 0;
         }
 
@@ -291,6 +351,17 @@ static int car_load(Park *park, Car *car)
         if (!park->park_open) {
             departed = 1;
             break;
+        }
+
+        if (park->fast_mode) {
+            if (park->current_time >= deadline_time && !expired) {
+                log_event(park, "Car %d waiting period expired", car->id);
+                departed = 1;
+                expired = 1;
+                break;
+            }
+            pthread_cond_wait(&park->ride_cv, &park->lock);
+            continue;
         }
 
         int rc = pthread_cond_timedwait(&park->ride_cv, &park->lock, &deadline);
@@ -319,7 +390,7 @@ static int car_load(Park *park, Car *car)
 
 static void car_run(Park *park, Car *car)
 {
-    sleep((unsigned int)park->r);
+    ride_sleep(park, park->r);
 
     pthread_mutex_lock(&park->lock);
     log_event(park, "Car %d has returned from the ride", car->id);
@@ -410,6 +481,7 @@ int main(int argc, char **argv)
     }
     if (monitor_pid == 0) {
         close(monitor_pipe[1]);
+        park_destroy(&park);
         monitor_process(monitor_pipe[0]);
     }
     close(monitor_pipe[0]);
@@ -442,11 +514,14 @@ int main(int argc, char **argv)
         }
     }
 
+    if (park.fast_mode) {
+        usleep(50000);
+    }
     for (int next_timestep = 1; next_timestep <= park.t; next_timestep++) {
         if (next_timestep % 5 == 0) {
             send_monitor_snapshot(&park, monitor_pipe[1], next_timestep);
         }
-        sleep(1);
+        advance_timestep(&park);
     }
 
     pthread_mutex_lock(&park.lock);

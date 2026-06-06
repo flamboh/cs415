@@ -8,6 +8,9 @@
 
 static long monitor_time(Park *park)
 {
+    if (park->fast_mode) {
+        return park->current_time;
+    }
     return (long)(time(NULL) - park->start_time);
 }
 

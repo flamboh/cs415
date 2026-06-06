@@ -51,9 +51,12 @@ typedef struct Park {
     int t;
     int j;
     int park_open;
+    int fast_mode;
+    int current_time;
     time_t start_time;
 
     pthread_mutex_t lock;
+    pthread_cond_t tick_cv;
     pthread_cond_t ticket_cv;
     pthread_cond_t ride_cv;
     pthread_cond_t load_cv;

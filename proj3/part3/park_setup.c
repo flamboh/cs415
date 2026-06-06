@@ -6,9 +6,11 @@
 int park_init(Park *park)
 {
     park->park_open = 1;
+    park->current_time = 0;
     park->start_time = time(NULL);
 
     if (pthread_mutex_init(&park->lock, NULL) != 0 ||
+        pthread_cond_init(&park->tick_cv, NULL) != 0 ||
         pthread_cond_init(&park->ticket_cv, NULL) != 0 ||
         pthread_cond_init(&park->ride_cv, NULL) != 0 ||
         pthread_cond_init(&park->load_cv, NULL) != 0 ||
@@ -63,6 +65,7 @@ void park_destroy(Park *park)
     queue_destroy(&park->unload_queue);
 
     pthread_cond_destroy(&park->ticket_cv);
+    pthread_cond_destroy(&park->tick_cv);
     pthread_cond_destroy(&park->ride_cv);
     pthread_cond_destroy(&park->load_cv);
     pthread_cond_destroy(&park->unload_cv);

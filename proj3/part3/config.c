@@ -14,6 +14,7 @@ static void usage(const char *program)
     printf("  -r ride seconds\n");
     printf("  -t park open seconds\n");
     printf("  -j max ride queue size\n");
+    printf("  -f fast test mode\n");
     printf("  -h help\n");
 }
 
@@ -25,7 +26,11 @@ void print_config(Park *park)
     printf("- Car waiting period: %d\n", park->w);
     printf("- Car ride duration: %d\n", park->r);
     printf("- Park duration: %d seconds\n", park->t);
-    printf("- Max ride queue size: %d\n\n", park->j);
+    printf("- Max ride queue size: %d\n", park->j);
+    if (park->fast_mode) {
+        printf("- Fast test mode: enabled\n");
+    }
+    printf("\n");
 }
 
 void parse_args(int argc, char **argv, Park *park)
@@ -39,8 +44,9 @@ void parse_args(int argc, char **argv, Park *park)
     park->r = 1;
     park->t = 30;
     park->j = 3;
+    park->fast_mode = 0;
 
-    while ((opt = getopt(argc, argv, "n:c:p:w:r:t:j:h")) != -1) {
+    while ((opt = getopt(argc, argv, "n:c:p:w:r:t:j:fh")) != -1) {
         switch (opt) {
             case 'n': park->n = atoi(optarg); break;
             case 'c': park->c = atoi(optarg); break;
@@ -49,6 +55,7 @@ void parse_args(int argc, char **argv, Park *park)
             case 'r': park->r = atoi(optarg); break;
             case 't': park->t = atoi(optarg); break;
             case 'j': park->j = atoi(optarg); break;
+            case 'f': park->fast_mode = 1; break;
             case 'h':
                 usage(argv[0]);
                 exit(EXIT_SUCCESS);
