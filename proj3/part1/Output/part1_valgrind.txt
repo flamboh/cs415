@@ -1,0 +1,41 @@
+==2029135== Memcheck, a memory error detector
+==2029135== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==2029135== Using Valgrind-3.18.1 and LibVEX; rerun with -h for copyright info
+==2029135== Command: ./park -p 1 -w 1 -r 1 -t 12 -j 1
+==2029135== 
+- Number of passenger threads: 1
+- Number of cars: 1
+- Capacity per car: 1
+- Car waiting period: 1
+- Car ride duration: 1
+- Park duration: 12 seconds
+- Max ride queue size: 1
+
+[Time: 0] Car 0 invoked load()
+[Time: 0] Passenger 0 entered the park
+[Time: 0] Passenger 0 is exploring the park
+[Time: 4] Passenger 0 finished exploring, entering the ticket booth
+[Time: 4] Passenger 0 entering the ticket queue
+[Time: 4] Passenger 0 acquired a ticket
+[Time: 4] Passenger 0 has entered the ride queue
+[Time: 4] Passenger 0 is boarding Car 0
+[Time: 4] Car 0 is full with 1 passengers
+[Time: 4] Car 0 has departed to ride with 1 passenger(s)
+[Time: 5] Car 0 has returned from the ride
+[Time: 5] Car 0 has invoked unload()
+[Time: 5] Passenger 0 unboarded from Car 0
+[Time: 5] Passenger 0 is exploring the park
+[Time: 5] Car 0 finished unloading
+[Time: 5] Car 0 invoked load()
+[Time: 12] Park closed
+[Time: 12] Car 0 stopped
+[Time: 12] Passenger 0 exited the park after 1 ride(s)
+==2029135== 
+==2029135== HEAP SUMMARY:
+==2029135==     in use at exit: 0 bytes in 0 blocks
+==2029135==   total heap usage: 14 allocs, 14 frees, 8,892 bytes allocated
+==2029135== 
+==2029135== All heap blocks were freed -- no leaks are possible
+==2029135== 
+==2029135== For lists of detected and suppressed errors, rerun with: -s
+==2029135== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
