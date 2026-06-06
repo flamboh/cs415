@@ -83,6 +83,7 @@ static int get_ticket_and_enter_ride_queue(Park *park, Passenger *passenger)
     }
 
     passenger->state = PASSENGER_TICKET_QUEUE;
+    passenger->ticket_queue_entered_at = time(NULL);
     queue_push(&park->ticket_queue, passenger->id);
     log_event(park, "Passenger %d entering the ticket queue", passenger->id);
     pthread_cond_broadcast(&park->ticket_cv);
@@ -92,10 +93,15 @@ static int get_ticket_and_enter_ride_queue(Park *park, Passenger *passenger)
         if (queue_front_is(&park->ticket_queue, passenger->id) &&
             !queue_is_full(&park->ride_queue)) {
             int ignored = -1;
+            time_t now = time(NULL);
             queue_pop(&park->ticket_queue, &ignored);
+            park->total_ticket_queue_seconds +=
+                (long)(now - passenger->ticket_queue_entered_at);
+            park->ticket_queue_samples++;
             log_event(park, "Passenger %d acquired a ticket", passenger->id);
 
             passenger->state = PASSENGER_WAITING_TO_BOARD;
+            passenger->ride_queue_entered_at = now;
             queue_push(&park->ride_queue, passenger->id);
             log_event(park, "Passenger %d has entered the ride queue", passenger->id);
             pthread_cond_broadcast(&park->ticket_cv);
@@ -145,6 +151,7 @@ static void wait_to_unboard(Park *park, Passenger *passenger)
     passenger->assigned_car = -1;
     passenger->completed_rides++;
     passenger->state = PASSENGER_DONE;
+    park->total_passengers_served++;
     park->cars[car_id].unboarded_count++;
     log_event(park, "Passenger %d unboarded", passenger->id);
     pthread_cond_broadcast(&park->unload_cv);
@@ -212,6 +219,9 @@ static int board_available_passengers(Park *park, Car *car)
         passenger = &park->passengers[passenger_id];
         passenger->assigned_car = car->id;
         passenger->state = PASSENGER_CAN_BOARD;
+        park->total_ride_queue_seconds +=
+            (long)(time(NULL) - passenger->ride_queue_entered_at);
+        park->ride_queue_samples++;
 
         car->passengers[car->onboard_count] = passenger_id;
         car->onboard_count++;
@@ -297,6 +307,8 @@ static int car_load(Park *park, Car *car)
 
     if (departed) {
         car->state = CAR_RUNNING;
+        park->total_car_runs++;
+        park->total_car_passengers += car->onboard_count;
         queue_push(&park->unload_queue, car->id);
         log_event(park, "Car %d has departed to ride", car->id);
     }
@@ -430,10 +442,11 @@ int main(int argc, char **argv)
         }
     }
 
-    send_monitor_snapshot(&park, monitor_pipe[1]);
-    for (int i = 0; i < park.t; i++) {
+    for (int next_timestep = 1; next_timestep <= park.t; next_timestep++) {
+        if (next_timestep % 5 == 0) {
+            send_monitor_snapshot(&park, monitor_pipe[1], next_timestep);
+        }
         sleep(1);
-        send_monitor_snapshot(&park, monitor_pipe[1]);
     }
 
     pthread_mutex_lock(&park.lock);
@@ -441,8 +454,7 @@ int main(int argc, char **argv)
     log_event(&park, "Park closed");
     broadcast_all(&park);
     pthread_mutex_unlock(&park.lock);
-    send_monitor_snapshot(&park, monitor_pipe[1]);
-    close(monitor_pipe[1]);
+    send_closed_snapshot(&park, monitor_pipe[1]);
 
     for (int i = 0; i < park.n; i++) {
         pthread_join(passenger_threads[i], NULL);
@@ -453,6 +465,8 @@ int main(int argc, char **argv)
     for (int i = 0; i < park.c; i++) {
         pthread_join(car_threads[i], NULL);
     }
+    send_final_statistics(&park, monitor_pipe[1]);
+    close(monitor_pipe[1]);
     waitpid(monitor_pid, NULL, 0);
 
     free(passenger_threads);

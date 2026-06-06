@@ -28,6 +28,8 @@ typedef struct Passenger {
     int id;
     int assigned_car;
     int completed_rides;
+    time_t ticket_queue_entered_at;
+    time_t ride_queue_entered_at;
     PassengerState state;
     pthread_cond_t cond;
 } Passenger;
@@ -64,6 +66,14 @@ typedef struct Park {
 
     Passenger *passengers;
     Car *cars;
+
+    long total_ticket_queue_seconds;
+    long total_ride_queue_seconds;
+    int ticket_queue_samples;
+    int ride_queue_samples;
+    int total_passengers_served;
+    int total_car_runs;
+    int total_car_passengers;
 } Park;
 
 typedef struct ThreadArg {

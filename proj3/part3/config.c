@@ -35,10 +35,10 @@ void parse_args(int argc, char **argv, Park *park)
     park->n = 10;
     park->c = 2;
     park->p = 2;
-    park->w = 3;
-    park->r = 2;
+    park->w = 1;
+    park->r = 1;
     park->t = 30;
-    park->j = 5;
+    park->j = 3;
 
     while ((opt = getopt(argc, argv, "n:c:p:w:r:t:j:h")) != -1) {
         switch (opt) {
