@@ -93,12 +93,11 @@ static int get_ticket_and_enter_ride_queue(Park *park, Passenger *passenger)
             queue_pop(&park->ticket_queue, &ignored);
             log_event(park, "Passenger %d acquired a ticket", passenger->id);
 
-            passenger->state = PASSENGER_RIDE_QUEUE;
+            passenger->state = PASSENGER_WAITING_TO_BOARD;
             queue_push(&park->ride_queue, passenger->id);
             log_event(park, "Passenger %d has entered the ride queue", passenger->id);
             pthread_cond_broadcast(&park->ticket_cv);
             pthread_cond_broadcast(&park->ride_cv);
-            pthread_cond_broadcast(&park->load_cv);
             pthread_mutex_unlock(&park->lock);
             return 1;
         }
@@ -119,7 +118,7 @@ static int get_ticket_and_enter_ride_queue(Park *park, Passenger *passenger)
 static int wait_to_board(Park *park, Passenger *passenger)
 {
     pthread_mutex_lock(&park->lock);
-    while (!passenger->can_board) {
+    while (passenger->state != PASSENGER_CAN_BOARD) {
         if (!park->park_open) {
             passenger_leave_queues(park, passenger->id);
             pthread_mutex_unlock(&park->lock);
@@ -128,7 +127,6 @@ static int wait_to_board(Park *park, Passenger *passenger)
         pthread_cond_wait(&passenger->cond, &park->lock);
     }
 
-    passenger->can_board = 0;
     passenger->state = PASSENGER_RIDING;
     pthread_mutex_unlock(&park->lock);
     return 1;
@@ -137,12 +135,11 @@ static int wait_to_board(Park *park, Passenger *passenger)
 static void wait_to_unboard(Park *park, Passenger *passenger)
 {
     pthread_mutex_lock(&park->lock);
-    while (!passenger->can_unboard) {
+    while (passenger->state != PASSENGER_CAN_UNBOARD) {
         pthread_cond_wait(&passenger->cond, &park->lock);
     }
 
     int car_id = passenger->assigned_car;
-    passenger->can_unboard = 0;
     passenger->assigned_car = -1;
     passenger->completed_rides++;
     passenger->state = PASSENGER_DONE;
@@ -158,7 +155,7 @@ static void *passenger_thread(void *arg)
     Park *park = thread_arg->park;
     int id = thread_arg->id;
     Passenger *passenger = &park->passengers[id];
-    unsigned int seed = (unsigned int)(time(NULL) ^ (id * 1103515245u));
+    unsigned int seed = (unsigned int)(id + 1);
     free(thread_arg);
 
     pthread_mutex_lock(&park->lock);
@@ -175,7 +172,7 @@ static void *passenger_thread(void *arg)
         log_event(park, "Passenger %d is exploring the park", id);
         pthread_mutex_unlock(&park->lock);
 
-        int explore_time = (int)(rand_r(&seed) % 10u) + 1;
+        int explore_time = (int)(rand_r(&seed) % 10) + 1;
         if (!sleep_while_open(park, explore_time)) {
             break;
         }
@@ -212,8 +209,7 @@ static int board_available_passengers(Park *park, Car *car)
         queue_pop(&park->ride_queue, &passenger_id);
         passenger = &park->passengers[passenger_id];
         passenger->assigned_car = car->id;
-        passenger->can_board = 1;
-        passenger->state = PASSENGER_BOARDING;
+        passenger->state = PASSENGER_CAN_BOARD;
 
         car->passengers[car->onboard_count] = passenger_id;
         car->onboard_count++;
@@ -330,7 +326,7 @@ static void car_unload(Park *park, Car *car)
     for (int i = 0; i < car->onboard_count; i++) {
         int passenger_id = car->passengers[i];
         Passenger *passenger = &park->passengers[passenger_id];
-        passenger->can_unboard = 1;
+        passenger->state = PASSENGER_CAN_UNBOARD;
         pthread_cond_signal(&passenger->cond);
     }
 

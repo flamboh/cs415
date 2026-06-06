@@ -9,9 +9,10 @@
 typedef enum {
     PASSENGER_EXPLORING,
     PASSENGER_TICKET_QUEUE,
-    PASSENGER_RIDE_QUEUE,
-    PASSENGER_BOARDING,
+    PASSENGER_WAITING_TO_BOARD,
+    PASSENGER_CAN_BOARD,
     PASSENGER_RIDING,
+    PASSENGER_CAN_UNBOARD,
     PASSENGER_DONE
 } PassengerState;
 
@@ -26,8 +27,6 @@ typedef enum {
 typedef struct Passenger {
     int id;
     int assigned_car;
-    int can_board;
-    int can_unboard;
     int completed_rides;
     PassengerState state;
     pthread_cond_t cond;

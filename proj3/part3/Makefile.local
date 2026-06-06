@@ -1,0 +1,29 @@
+CC = clang
+TARGET := park
+SRCS := $(wildcard *.c)
+OBJS := $(SRCS:.c=.o)
+
+CPPFLAGS ?=
+CFLAGS ?= -std=c11 -g -Wall -Wextra -Wpedantic -D_DARWIN_C_SOURCE
+LDFLAGS ?=
+LDLIBS ?=
+
+.PHONY: all run asan clean
+
+all: $(TARGET)
+
+$(TARGET): $(OBJS)
+	$(CC) $(LDFLAGS) $^ $(LDLIBS) -o $@
+
+%.o: %.c
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
+
+run: $(TARGET)
+	./$(TARGET) $(ARGS)
+
+asan:
+	$(MAKE) -f Makefile.local clean
+	$(MAKE) -f Makefile.local CFLAGS="$(CFLAGS) -fsanitize=address,undefined -fno-omit-frame-pointer" LDFLAGS="$(LDFLAGS) -fsanitize=address,undefined"
+
+clean:
+	rm -rf $(TARGET) $(OBJS) *.dSYM
