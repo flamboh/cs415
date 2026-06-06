@@ -13,7 +13,7 @@ make
 ./park -n 30 -c 4 -p 2 -w 3 -r 2 -t 60 -j 10
 ```
 
-Parts 1 and 2 compile and run the same way from their own directories.
+Parts 1 and 2 compile and run the same way from their own directories. Part 1 blocks config for number of passengers and car capacity.
 
 ## Fast mode
 I've also added an additional `-f` flag to enable a faster testing mode in part 3.

@@ -529,7 +529,6 @@ int main(int argc, char **argv)
     log_event(&park, "Park closed");
     broadcast_all(&park);
     pthread_mutex_unlock(&park.lock);
-    send_closed_snapshot(&park, monitor_pipe[1]);
 
     for (int i = 0; i < park.n; i++) {
         pthread_join(passenger_threads[i], NULL);
@@ -540,6 +539,7 @@ int main(int argc, char **argv)
     for (int i = 0; i < park.c; i++) {
         pthread_join(car_threads[i], NULL);
     }
+    send_closed_snapshot(&park, monitor_pipe[1]);
     send_final_statistics(&park, monitor_pipe[1]);
     close(monitor_pipe[1]);
     waitpid(monitor_pid, NULL, 0);
